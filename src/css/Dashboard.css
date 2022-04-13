@@ -1,0 +1,43 @@
+
+.carousel-demo .product-item .product-item-content {
+    border: 1px solid var(--surface-d);
+    border-radius: 3px;
+    margin: .3rem;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.carousel-demo .product-item .product-image {
+    width: 50%;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.organizationchart-demo .p-organizationchart .p-person {
+    padding: 1;
+    border: 1;
+}
+
+.organizationchart-demo .p-organizationchart .componente, .organizationchart-demo .p-organizationchart .node-content {
+    padding: .5em .7rem;
+}
+
+.organizationchart-demo .p-organizationchart .componente{
+    background-color: rgb(2, 185, 185);
+    color: #ffffff;
+}
+
+.organizationchart-demo .p-organizationchart .indicador {
+    background-color: rgb(255, 217, 0);
+    color: #333333;
+    padding: .5em .7rem;
+}
+
+.organizationchart-demo .p-organizationchart .node-content img {
+    border-radius: 50%;
+}
+
+.organizationchart-demo .p-organizationchart .eje {
+    background-color: rgb(116, 172, 33);
+    color: #000000;
+    
+}

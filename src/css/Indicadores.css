@@ -1,0 +1,12 @@
+.crud-demo .row-eje {
+    background-color: rgba(69, 102, 252, 0.37) !important;
+    
+}
+
+.crud-demo .row-determinate {
+    background-color: rgba(192, 212, 253, 0.37) !important;
+}
+
+.crud-demo .row-indicador {
+    height: 5px !important;
+}

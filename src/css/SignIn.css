@@ -1,0 +1,26 @@
+
+.cardSignin{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    transform: translate(-50%, -50%);
+    padding: auto;
+    background: linear-gradient(to bottom right, #3f8180 0%, #53e3a6 100%);
+}
+
+.cardSignin h2{
+    color: white;
+}
+
+.title{
+    font-size: 35px;
+    color: white;
+}
+
+.imagen{
+    width: 40%;
+    transform: translate(200%, 5%) rotate(-80deg);
+    opacity: 0.8;
+}
+
