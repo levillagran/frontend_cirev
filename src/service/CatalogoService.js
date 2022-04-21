@@ -70,6 +70,18 @@ class CatalogoService {
     return res.data;
   }
 
+  async getTecnicas(especificacionId) {
+    const res = await axios
+    .get(baseURL() + "catalogos/tecnicas/" + especificacionId, { headers: authHeader() });
+    return res.data;
+  }
+
+  async getReactivos(technicaId) {
+    const res = await axios
+    .get(baseURL() + "catalogos/kits/" + technicaId, { headers: authHeader() });
+    return res.data;
+  }
+
 }
 
 export default new CatalogoService();  

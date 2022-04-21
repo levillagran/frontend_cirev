@@ -3,7 +3,6 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Toast } from 'primereact/toast';
-import { Toolbar } from 'primereact/toolbar';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
@@ -12,6 +11,9 @@ import { Calendar } from 'primereact/calendar';
 import { RadioButton } from 'primereact/radiobutton';
 import { InputSwitch } from 'primereact/inputswitch';
 import { Dropdown } from 'primereact/dropdown';
+import { FileUpload } from 'primereact/fileupload';
+import { ProgressBar } from 'primereact/progressbar';
+import { Tag } from 'primereact/tag';
 
 import RequerimientoService from '../service/RequerimientoService';
 import CatalogoService from '../service/CatalogoService';
@@ -28,6 +30,7 @@ export const RequerimientosMuestras = () => {
 
     let emptySample =
     {
+        idNum: '',
         id: '',
         placeCode: '',
         collectionDate: '',
@@ -104,8 +107,14 @@ export const RequerimientosMuestras = () => {
         text2: '',
         text3: '',
         text4: '',
-        text4: '',
         text5: ''
+    };
+
+    let evidenceLoad =
+    {
+        id: null,
+        evidence: '',
+        userId: null
     };
 
     const toast = useRef(null);
@@ -124,6 +133,7 @@ export const RequerimientosMuestras = () => {
     const [obsRegister, setObsRegister] = useState('');
 
     const [submitted, setSubmitted] = useState(false);
+    const [loadDialog, setLoadDialog] = useState(false);
     const [pdfDialog, setPdfDialog] = useState(false);
     const [solicitudDialog, setSolicitudDialog] = useState(false);
 
@@ -184,6 +194,11 @@ export const RequerimientosMuestras = () => {
     const [request, setRequest] = useState(requestEmpty);
     const [requestDetail, setRequestDetail] = useState(requestDetailEmpty);
 
+    const [evidencia, setEvidencia] = useState('');
+    const [evidenciaUpload, setEvidenciaUpload] = useState(evidenceLoad);
+    const [reqLoadId, setReqLoadId] = useState(null);
+    const [subirButon, setSubirButon] = useState(false);
+
     useEffect(() => {
         async function getRequerimientos() {
             const reque = await RequerimientoService.getRequerimientos();
@@ -196,6 +211,7 @@ export const RequerimientosMuestras = () => {
         setSubmitted(false);
         setSolicitudDialog(false);
         setPdfDialog(false);
+        setLoadDialog(false);
     }
 
     const setIsInternalValue = (value) => {
@@ -628,7 +644,11 @@ export const RequerimientosMuestras = () => {
             setDateValueRequest(new Date(req.entryDate));
             setDateValueSample('');
             setAlmacenEnable(false);
-            setProducts3(req.details);
+            setProducts2([]);
+            req.details.map((e, index) => { 
+                products2.push({ "idNum": index + 1, ...e });
+            });
+            setProducts3(products2);
             // carga todos los catalogos para la pantalla
             loadCatalog();
             setSubmitted(false);
@@ -637,11 +657,10 @@ export const RequerimientosMuestras = () => {
         getRequerimiento();
     }
 
-    const viewDoc = (rowData) => {
+    const createDoc = (rowData) => {
         async function getConprovante() {
-            const comp = await RequerimientoService.getConprovante(rowData.id);
-            console.log(comp);
-            if (comp.length > 0) {
+            const comp = await RequerimientoService.getCreateConprovante(rowData.id);
+            if (comp !== null) {
                 setViewPdf(comp);
             }
             else {
@@ -652,18 +671,65 @@ export const RequerimientosMuestras = () => {
         getConprovante();
     }
 
+    const loadDoc = (rowData) => {
+        setSubirButon(false);
+        setReqLoadId(rowData.id);
+        setLoadDialog(true);
+        setEvidenciaUpload(evidenceLoad);
+    }
+
+    const viewDoc = (rowData) => {
+        async function getConprovante() {
+            const comp = await RequerimientoService.getConprovante(rowData.id);
+            if (comp !== null) {
+                setViewPdf(comp);
+            }
+            else {
+                setViewPdf(null);
+            }
+            setPdfDialog(true);
+        }
+        getConprovante();
+    }
+
+    const onFileChange = (e) => {
+        const file = e.target.files[0]
+        const reader = new FileReader();
+        let baseURL = "";
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            baseURL = reader.result;
+            setEvidencia(baseURL);
+        };
+        setSubirButon(true);
+    }
+
+    const saveEvidence = () => {
+        setSubmitted(true);
+        async function postSaveEvidence() {
+            console.log(reqLoadId);
+            evidenciaUpload.id = reqLoadId;
+            evidenciaUpload.evidence = evidencia;
+            const user = JSON.parse(localStorage.getItem('user'));
+            evidenciaUpload.userId = user.id;
+            const reque = await RequerimientoService.postSaveEvidence(evidenciaUpload);
+            setRequerimientos(reque);
+        }
+        if (reqLoadId !== null) {
+            postSaveEvidence();
+            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Evidencia psubida con exito.', life: 5000 });
+            setLoadDialog(false);
+        }
+        setReqLoadId(null);
+    }
+
     const actionBodyTemplate = (rowData) => {
         return (
             <div className="actions">
-                <Button icon="pi pi-pencil" className="p-button-rounded p-button-warning mr-2" title="Editar" onClick={() => editRequest(rowData)} />
-            </div>
-        );
-    }
-
-    const evidenceBodyTemplate = (rowData) => {
-        return (
-            <div className="actions">
-                <Button icon="pi pi-eye" className="p-button-rounded p-button-info mr-2" onClick={() => viewDoc(rowData)} title="Ver evidencia"></Button>
+                <Button icon="pi pi-pencil" className="p-button-rounded p-button-warning mr-1" title="Editar requerimiento" onClick={() => editRequest(rowData)} style={{ height: '2rem', width: '2rem' }}></Button>
+                <Button icon="pi pi-upload" className="p-button-rounded p-button-success mr-1" onClick={() => loadDoc(rowData)} title="Subir documento" style={{ height: '2rem', width: '2rem' }}></Button>
+                <Button icon="pi pi-eye" className="p-button-rounded p-button-info mr-1" onClick={() => viewDoc(rowData)} title="Ver documento" style={{ height: '2rem', width: '2rem' }}></Button>
+                <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>
             </div>
         );
     }
@@ -755,12 +821,19 @@ export const RequerimientosMuestras = () => {
     }
 
     ////////////////////
+    const [products2, setProducts2] = useState([]);
     const [products3, setProducts3] = useState([]);
 
     const setNewSamplesDetail = () => {
-        emptySample.id = numSample + 1;
+        emptySample.idNum = numSample + 1;
         products3.push(emptySample);
         setNumSample(numSample + 1);
+    }
+
+    const setLessSamplesDetail = () => {
+        emptySample.idNum = numSample - 1;
+        products3.pop(emptySample);
+        setNumSample(numSample - 1);
     }
 
     const onIsAcceptedChange = (options, e) => {
@@ -890,7 +963,7 @@ export const RequerimientosMuestras = () => {
     }
 
     const columns = [
-        { field: 'id', header: 'Nº' },
+        { field: 'idNum', header: 'Nº' },
         { field: 'placeCode', header: 'Id campo' },
         { field: 'collectionDate', header: 'Fecha colecta' },
         { field: 'province', header: 'Provincia' },
@@ -939,6 +1012,13 @@ export const RequerimientosMuestras = () => {
         </>
     );
 
+    const uploadDialogFooter = (
+        <>
+            <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
+            <Button label="Subir" icon="pi pi-check" className="p-button-text" onClick={saveEvidence} disabled={!subirButon} />
+        </>
+    );
+
     addLocale('es', {
         firstDayOfWeek: 1,
         dayNames: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
@@ -964,8 +1044,7 @@ export const RequerimientosMuestras = () => {
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Página {first} / {last} , {totalRecords} Requerimientos"
                             globalFilter={globalFilter} emptyMessage="Requerimientos no encontrados." header={header}>
-                            <Column body={actionBodyTemplate} style={{ width: '3rem' }}></Column>
-                            <Column body={evidenceBodyTemplate} style={{ width: '3rem' }}></Column>
+                            <Column body={actionBodyTemplate} style={{ width: '11rem' }}></Column>
                             <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '5rem' }}></Column>
                             <Column field="entryDate" header="Fecha Ingreso" sortable body={entryDateBodyTemplate} style={{ width: '6rem' }}></Column>
                             <Column field="project" header="Proyecto" sortable body={proyectoBodyTemplate} style={{ width: '18rem' }}></Column>
@@ -984,7 +1063,7 @@ export const RequerimientosMuestras = () => {
                                         <img src='/assets/demo/images/galeriaSistema/registro.jpg' width="175rem" height="280rem" />
                                     </div>
                                     <div className="col-10">
-                                        <h3 className="m-0">Registro de Ingreso de Requerimiento del Usuario</h3>
+                                        <h3 className="m-0">Registro de ingreso de requerimiento del usuario</h3>
                                         <div className="formgroup-inline mt-2">
                                             <div className="col-3">
                                                 <label htmlFor="dateReques">Fecha del requerimiento</label>
@@ -1067,8 +1146,9 @@ export const RequerimientosMuestras = () => {
                                 <div className="mx-5">
                                     <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
                                         <h5>Muestras</h5>
-                                        <div>
-                                            <Button label="Nueva" icon="pi pi-plus" className="p-button-success" onClick={() => setNewSamplesDetail()} />
+                                        <div className="flex">
+                                            <Button icon="pi pi-plus" className="p-button-rounded p-button-success mr-2" onClick={() => setNewSamplesDetail()} />
+                                            {products3.length > 0 && <Button icon="pi pi-minus" className="p-button-rounded p-button-danger" onClick={() => setLessSamplesDetail()} />}
                                             {submitted && products3.length === 0 && <small style={{ color: 'red' }}>Agregue al menos una muestra.</small>}
                                         </div>
                                     </div>
@@ -1078,7 +1158,7 @@ export const RequerimientosMuestras = () => {
                                             {
                                                 columns.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
-                                                        style={{ width: (field === 'id') ? '2rem' : (field === 'placeCode') ? '8rem' : (field === 'gender') ? '7rem' : (field === 'isPreprocessed') ? '8rem' : (field === 'isAccepted') ? '6rem' : (field === 'razonNoAccepted') ? '10rem' : (field === 'collectionDate') ? '8rem' : (field === 'storage') ? '35rem' : (field === 'observations') ? '15rem' : '7rem' }}
+                                                        style={{ width: (field === 'idNum') ? '2rem' : (field === 'placeCode') ? '8rem' : (field === 'gender') ? '7rem' : (field === 'isPreprocessed') ? '8rem' : (field === 'isAccepted') ? '6rem' : (field === 'razonNoAccepted') ? '10rem' : (field === 'collectionDate') ? '8rem' : (field === 'storage') ? '35rem' : (field === 'observations') ? '15rem' : '7rem' }}
                                                         editor={(options) => cellEditor(options)} />
                                                 })
                                             }
@@ -1087,13 +1167,24 @@ export const RequerimientosMuestras = () => {
                                 </div>
                             </div>
                         </Dialog>
-                        <Dialog visible={pdfDialog} style={{ width: '700px' }} header="Vista de requerimiento" modal className="p-fluid" onHide={hideDialog}>
+                        <Dialog visible={pdfDialog} style={{ width: '750px' }} header="Evidencia" modal className="p-fluid" onHide={hideDialog}>
                             <div className='pdf-container'>
-                                {viewPdf && <><Worker workerUrl="https://unpkg.com/pdfjs-dist@2.6.347/build/pdf.worker.min.js">
-                                    <Viewer fileUrl={viewPdf}
-                                        plugins={[defaultLayoutPluginInstance]} />
+                                {viewPdf && <><Worker workerUrl="https://unpkg.com/pdfjs-dist@2.13.216/build/pdf.worker.js">
+                                    <Viewer
+                                        fileUrl={viewPdf}
+                                        plugins={[defaultLayoutPluginInstance]}
+                                    />
                                 </Worker></>}
                                 {!viewPdf && <>Archivo pdf no seleccionado</>}
+                            </div>
+                        </Dialog>
+                        <Dialog visible={loadDialog} style={{ width: '700px' }} header="Subir archivo" modal className="p-fluid" footer={uploadDialogFooter} onHide={hideDialog}>
+                            <div className="formgrid grid mt-4 ml-3">
+                                <div className="field col-12">
+                                    <input type="file" name="archivo" accept="application/pdf" onChange={(e) => onFileChange(e)} style={{ width: '40rem' }}></input>
+                                    <br />
+                                    <small> (extencion .pdf, tamaño máximo 2Mb)</small>
+                                </div>
                             </div>
                         </Dialog>
                     </div>

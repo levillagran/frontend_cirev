@@ -22,9 +22,21 @@ class RequerimientoService {
     return res.data;
   } 
 
+  async getCreateConprovante(requerimientoId) { 
+    const res = await axios
+    .get(baseURL() + "requerimientos/comprobanteCreate/" + requerimientoId, { headers: authHeader() });
+    return res.data;
+  } 
+
   async getConprovante(requerimientoId) { 
     const res = await axios
-    .get(baseURL() + "requerimientos/comprobante/" + requerimientoId, { headers: authHeader() });
+    .get(baseURL() + "requerimientos/comprobanteView/" + requerimientoId, { headers: authHeader() });
+    return res.data;
+  } 
+
+  async postSaveEvidence(data) { 
+    const res = await axios
+    .post(baseURL() + "requerimientos/comprobanteSave", data, { headers: authHeader() });
     return res.data;
   } 
 
