@@ -93,12 +93,16 @@ export const Procesamiento = () => {
     const dt = useRef(null);
     const [globalFilter, setGlobalFilter] = useState(null);
 
+    const [viewPdf, setViewPdf] = useState(null);
+    const defaultLayoutPluginInstance = defaultLayoutPlugin();
+
     const [dateValueRequest, setDateValueRequest] = useState(null);
     const [dateValueSample, setDateValueSample] = useState(null);
     const [processingUsersId, setProcessingUsersId] = useState("");
 
     const [submitted, setSubmitted] = useState(false);
     const [procesamientoDialog, setProcesamientoDialog] = useState(false);
+    const [pdfDialog, setPdfDialog] = useState(false);
 
     const [requerimientos, setRequerimientos] = useState(null);
     const [requerimientoId, setRequerimientoId] = useState(null);
@@ -137,6 +141,7 @@ export const Procesamiento = () => {
     const hideDialog = () => {
         setSubmitted(false);
         setProcesamientoDialog(false);
+        setPdfDialog(false);
     }
 
     const header = (
@@ -228,6 +233,20 @@ export const Procesamiento = () => {
         setReactivoSeleccionado(reactivo.value)
     }
 
+    const createDoc = (rowData) => {
+        async function getConprovante() {
+            const comp = await ProcesamientoService.getCreateConprovante(rowData.id);
+            if (comp !== null) {
+                setViewPdf(comp);
+            }
+            else {
+                setViewPdf(null);
+            }
+            setPdfDialog(true);
+        }
+        getConprovante();
+    }
+
     const enterProcess = (request) => {
         async function getRequerimiento() {
             const req = await ProcesamientoService.getProcesamiento(request.id);
@@ -236,7 +255,6 @@ export const Procesamiento = () => {
             setProcessingUsersId(req.processingUsersId);
             setAnalisisSeleccionado({ "name": req.analysis, "code": req.analysisId });
             setEspecificacionesSeleccionado({ "name": req.specification, "code": req.specificationId });
-            console.log(req.techniqueId);
             req.techniqueId ? setTecnicaSeleccionado({ "name": req.technique, "code": req.techniqueId }) : setTecnicaSeleccionado("");
             req.kitReagentId ? setReactivoSeleccionado({ "name": req.kitReagent, "code": req.kitReagentId }) : setReactivoSeleccionado("");
             req.techniqueId ? setReactivosEnable(false) : setReactivosEnable(true);
@@ -279,6 +297,7 @@ export const Procesamiento = () => {
         return (
             <div className="actions">
                 <Button icon="pi pi-filter" className="p-button-rounded p-button-success mr-1" title="Procesar" onClick={() => enterProcess(rowData)} style={{ height: '2rem', width: '2rem' }}></Button>
+                <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>
             </div>
         );
     }
@@ -366,7 +385,7 @@ export const Procesamiento = () => {
 
     const columns = [
         { field: 'idNum', header: 'Nº' },
-        { field: 'placeCode', header: 'Id campo' },
+        { field: 'placeCode', header: 'Id Muestra' },
         { field: 'processingResults', header: 'Resultados' },
         { field: 'observationResults', header: 'Observaciones' }
     ];
@@ -410,10 +429,10 @@ export const Procesamiento = () => {
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Página {first} / {last} , {totalRecords} Requerimientos"
                             globalFilter={globalFilter} emptyMessage="Requerimientos no encontrados." header={header}>
-                            <Column body={actionBodyTemplate} style={{ width: '3rem' }}></Column>
-                            <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '5rem' }}></Column>
+                            <Column body={actionBodyTemplate} style={{ width: '6rem' }}></Column>
+                            <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '10rem' }}></Column>
                             <Column field="entryDate" header="Fecha Procesamiento" sortable body={entryDateBodyTemplate} style={{ width: '7rem' }}></Column>
-                            <Column field="project" header="Proyecto" sortable body={proyectoBodyTemplate} style={{ width: '18rem' }}></Column>
+                            <Column field="project" header="Proyecto" sortable body={proyectoBodyTemplate} style={{ width: '15rem' }}></Column>
                             <Column field="analysis" header="Análisis" sortable body={analisisBodyTemplate} style={{ width: '7rem' }}></Column>
                             <Column field="typeSample" header="Tipo de Muestra" sortable body={typeSampleBodyTemplate} style={{ width: '7rem' }}></Column>
                             <Column field="numSamples" header="Nº Muestras" sortable body={numSmplesBodyTemplate} style={{ width: '6rem' }}></Column>
@@ -428,7 +447,7 @@ export const Procesamiento = () => {
                                         <img src='/assets/demo/images/galeriaSistema/proceso.jpg' width="160rem" height="230rem" />
                                     </div>
                                     <div className="col-10">
-                                        <h3 className="m-0">Registro del procesamiento de puestras</h3>
+                                        <h3 className="m-0">Registro del procesamiento de muestras</h3>
                                         <div className="formgroup-inline">
                                             <div className="col-2">
                                                 <label >Fecha requerimiento</label>
@@ -493,6 +512,17 @@ export const Procesamiento = () => {
                                         </DataTable>
                                     </div>
                                 </div>
+                            </div>
+                        </Dialog>
+                        <Dialog visible={pdfDialog} style={{ width: '750px' }} header="Evidencia" modal className="p-fluid" onHide={hideDialog}>
+                            <div className='pdf-container'>
+                                {viewPdf && <><Worker workerUrl="https://unpkg.com/pdfjs-dist@2.13.216/build/pdf.worker.js">
+                                    <Viewer
+                                        fileUrl={viewPdf}
+                                        plugins={[defaultLayoutPluginInstance]}
+                                    />
+                                </Worker></>}
+                                {!viewPdf && <>Archivo pdf no seleccionado</>}
                             </div>
                         </Dialog>
                     </div>

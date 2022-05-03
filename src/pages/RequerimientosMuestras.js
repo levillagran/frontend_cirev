@@ -1009,6 +1009,7 @@ export const RequerimientosMuestras = () => {
         <>
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
             <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={saveSolicitud} />
+            <Button label="Guardar y enviar a procesar" icon="pi pi-check" className="p-button-text" onClick={saveSolicitud} />
         </>
     );
 
@@ -1045,9 +1046,9 @@ export const RequerimientosMuestras = () => {
                             currentPageReportTemplate="Página {first} / {last} , {totalRecords} Requerimientos"
                             globalFilter={globalFilter} emptyMessage="Requerimientos no encontrados." header={header}>
                             <Column body={actionBodyTemplate} style={{ width: '11rem' }}></Column>
-                            <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '5rem' }}></Column>
+                            <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '10rem' }}></Column>
                             <Column field="entryDate" header="Fecha Ingreso" sortable body={entryDateBodyTemplate} style={{ width: '6rem' }}></Column>
-                            <Column field="project" header="Proyecto" sortable body={proyectoBodyTemplate} style={{ width: '18rem' }}></Column>
+                            <Column field="project" header="Proyecto" sortable body={proyectoBodyTemplate} style={{ width: '15rem' }}></Column>
                             <Column field="analysis" header="Análisis" sortable body={analisisBodyTemplate} style={{ width: '7rem' }}></Column>
                             <Column field="typeSample" header="Tipo de Muestra" sortable body={typeSampleBodyTemplate} style={{ width: '7rem' }}></Column>
                             <Column field="numSamples" header="Nº Muestras" sortable body={numSmplesBodyTemplate} style={{ width: '6rem' }}></Column>

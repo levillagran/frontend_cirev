@@ -22,6 +22,12 @@ class ProcesamientoService {
     return res.data;
   } 
 
+  async getCreateConprovante(requerimientoId) { 
+    const res = await axios
+    .get(baseURL() + "procesamientos/comprobanteCreate/" + requerimientoId, { headers: authHeader() });
+    return res.data;
+  }  
+
 }
 
 export default new ProcesamientoService();
