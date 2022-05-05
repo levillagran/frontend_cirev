@@ -25,7 +25,7 @@ import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { Worker } from '@react-pdf-viewer/core';
 
-export const Secuenciacion = () => {
+export const Aprobacion = () => {
 
     let requestDetailEmpty =
     {
@@ -126,7 +126,7 @@ export const Secuenciacion = () => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Secuenciación</h5>
+            <h5 className="m-0">Aprobación</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />

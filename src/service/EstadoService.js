@@ -4,11 +4,12 @@ import baseURL from "./baseURL";
 
 class EstadoService {
 
-  async getEstados() {
+  async changeStatus(data) {
     const res = await axios
-    .get(baseURL() + "estados/all", { headers: authHeader() });
+    .post(baseURL() + "estados/changeStatus", data, { headers: authHeader() });
     return res.data;
   }
+  
 }
 
 export default new EstadoService();

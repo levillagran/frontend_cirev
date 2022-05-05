@@ -16,6 +16,7 @@ import { ProgressBar } from 'primereact/progressbar';
 import { Tag } from 'primereact/tag';
 
 import RequerimientoService from '../service/RequerimientoService';
+import EstadoService from '../service/EstadoService';
 import CatalogoService from '../service/CatalogoService';
 
 import { locale, addLocale } from 'primereact/api';
@@ -117,6 +118,12 @@ export const RequerimientosMuestras = () => {
         userId: null
     };
 
+    let emptyChangeStatus =
+    {
+        requerimientoId: null,
+        estadoId: null
+    };
+
     const toast = useRef(null);
     const dt = useRef(null);
     const [globalFilter, setGlobalFilter] = useState(null);
@@ -198,6 +205,8 @@ export const RequerimientosMuestras = () => {
     const [evidenciaUpload, setEvidenciaUpload] = useState(evidenceLoad);
     const [reqLoadId, setReqLoadId] = useState(null);
     const [subirButon, setSubirButon] = useState(false);
+
+    const [chgStatus, setChgStatus] = useState(emptyChangeStatus);
 
     useEffect(() => {
         async function getRequerimientos() {
@@ -370,6 +379,24 @@ export const RequerimientosMuestras = () => {
             toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Solicitud guardada exitosamente', life: 5000 });
             setSolicitudDialog(false);
             //setUsuario(emptyUsuraio);
+        } else {
+            toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Ingrese toda la información', life: 5000 });
+        }
+    }
+
+    const saveSendSolicitud = () => {
+        setSubmitted(true);
+        async function changeStatus(chgSt) {
+            const reque = await EstadoService.changeStatus(chgSt);
+            setRequerimientos(reque);
+        }
+        if (products3.length > 0 && especificacionSeleccionado && submitted && usuarioSeleccionado && tipoMuestraSeleccionado) {
+            saveSolicitud();
+            chgStatus.requerimientoId = requerimientoId;
+            chgStatus.estadoId = 2;
+            changeStatus(chgStatus);
+            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Solicitud enviada a procesar', life: 5000 });
+            setSolicitudDialog(false);
         } else {
             toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Ingrese toda la información', life: 5000 });
         }
@@ -645,7 +672,7 @@ export const RequerimientosMuestras = () => {
             setDateValueSample('');
             setAlmacenEnable(false);
             setProducts2([]);
-            req.details.map((e, index) => { 
+            req.details.map((e, index) => {
                 products2.push({ "idNum": index + 1, ...e });
             });
             setProducts3(products2);
@@ -726,12 +753,42 @@ export const RequerimientosMuestras = () => {
     const actionBodyTemplate = (rowData) => {
         return (
             <div className="actions">
-                <Button icon="pi pi-pencil" className="p-button-rounded p-button-warning mr-1" title="Editar requerimiento" onClick={() => editRequest(rowData)} style={{ height: '2rem', width: '2rem' }}></Button>
-                <Button icon="pi pi-upload" className="p-button-rounded p-button-success mr-1" onClick={() => loadDoc(rowData)} title="Subir documento" style={{ height: '2rem', width: '2rem' }}></Button>
+                {rowData.status === "Creado" && <Button icon="pi pi-pencil" className="p-button-rounded p-button-warning mr-1" title="Editar requerimiento" onClick={() => editRequest(rowData)} style={{ height: '2rem', width: '2rem' }}></Button>}
+                {rowData.status === "Creado" && <Button icon="pi pi-upload" className="p-button-rounded p-button-success mr-1" onClick={() => loadDoc(rowData)} title="Subir documento" style={{ height: '2rem', width: '2rem' }}></Button>}
                 <Button icon="pi pi-eye" className="p-button-rounded p-button-info mr-1" onClick={() => viewDoc(rowData)} title="Ver documento" style={{ height: '2rem', width: '2rem' }}></Button>
-                <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>
+                {rowData.status === "Creado" && <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>}
             </div>
         );
+    }
+
+    const statusBodyTemplate = (rowData) => {
+        if (rowData.status === "Creado") {
+            return (
+                <>
+                    <Tag severity="danger" value="Registro" rounded></Tag>
+                </>
+            )
+        } else if (rowData.status === "Registrado") {
+            return (
+                <>
+                    <Tag severity="warning" value="Procesamiento" rounded></Tag>
+                </>
+            )
+        }
+        else if (rowData.status === "Procesado") {
+            return (
+                <>
+                    <Tag severity="success" value="Aprobación" rounded></Tag>
+                </>
+            )
+        }
+        else if (rowData.status === "Validado") {
+            return (
+                <>
+                    <Tag severity="Info" value="Entregadas" rounded></Tag>
+                </>
+            )
+        }
     }
 
     const numberBodyTemplate = (rowData) => {
@@ -1007,9 +1064,9 @@ export const RequerimientosMuestras = () => {
 
     const requerimientoDialogFooter = (
         <>
-            <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
             <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={saveSolicitud} />
-            <Button label="Guardar y enviar a procesar" icon="pi pi-check" className="p-button-text" onClick={saveSolicitud} />
+            <Button label="Guardar y enviar a procesar" icon="pi pi-check" className="p-button-text" onClick={saveSendSolicitud} />
+            <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
         </>
     );
 
@@ -1046,7 +1103,8 @@ export const RequerimientosMuestras = () => {
                             currentPageReportTemplate="Página {first} / {last} , {totalRecords} Requerimientos"
                             globalFilter={globalFilter} emptyMessage="Requerimientos no encontrados." header={header}>
                             <Column body={actionBodyTemplate} style={{ width: '11rem' }}></Column>
-                            <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '10rem' }}></Column>
+                            <Column field="status" header="Estado" sortable body={statusBodyTemplate} style={{ width: '7rem' }}></Column>
+                            <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '8rem' }}></Column>
                             <Column field="entryDate" header="Fecha Ingreso" sortable body={entryDateBodyTemplate} style={{ width: '6rem' }}></Column>
                             <Column field="project" header="Proyecto" sortable body={proyectoBodyTemplate} style={{ width: '15rem' }}></Column>
                             <Column field="analysis" header="Análisis" sortable body={analisisBodyTemplate} style={{ width: '7rem' }}></Column>

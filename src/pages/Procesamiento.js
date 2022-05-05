@@ -14,6 +14,7 @@ import { Dropdown } from 'primereact/dropdown';
 import Moment from 'moment';
 
 import ProcesamientoService from '../service/ProcesamientoService';
+import EstadoService from '../service/EstadoService';
 import CatalogoService from '../service/CatalogoService';
 
 import { locale, addLocale } from 'primereact/api';
@@ -58,35 +59,30 @@ export const Procesamiento = () => {
     let requestDetailEmpty =
     {
         id: null,
-        processingResults: '',
-        observationResults: ''
+        processingResults01: '',
+        observationResults01: '',
+        dateResults01: '',
+        processingResults02: '',
+        observationResults02: '',
+        dateResults02: '',
+        processingResults03: '',
+        observationResults03: '',
+        dateResults03: ''
     };
 
     let requestEmpty =
     {
         id: null,
-        processingDate: '',
         techniqueId: '',
         kitReagentId: '',
         processingUsersId: '',
         details: []
     };
 
-    let almacenEmpty =
+    let emptyChangeStatus =
     {
-        id: null,
-        text1: '',
-        text2: '',
-        text3: '',
-        text4: '',
-        text5: ''
-    };
-
-    let evidenceLoad =
-    {
-        id: null,
-        evidence: '',
-        userId: null
+        requerimientoId: null,
+        estadoId: null
     };
 
     const toast = useRef(null);
@@ -129,6 +125,8 @@ export const Procesamiento = () => {
     const [request, setRequest] = useState(requestEmpty);
     const [requestDetail, setRequestDetail] = useState(requestDetailEmpty);
 
+    const [chgStatus, setChgStatus] = useState(emptyChangeStatus);
+
 
     useEffect(() => {
         async function getRequerimientos() {
@@ -163,24 +161,49 @@ export const Procesamiento = () => {
         if (tecnicaSeleccionado && submitted && reactivoSeleccionado) {
             setRequest(requestEmpty);
             request.id = requerimientoId;
-            request.processingDate = dateValueSample.getDate() + '-' + (dateValueSample.getMonth() + 1) + '-' + dateValueSample.getFullYear();
             request.techniqueId = tecnicaSeleccionado.code;
             request.kitReagentId = reactivoSeleccionado.code;
             const user = JSON.parse(localStorage.getItem('user'));
-            if (processingUsersId === "" || processingUsersId === null){
+            if (processingUsersId === "" || processingUsersId === null) {
                 request.processingUsersId = user.id.toString();
-            } else{
+            } else {
                 request.processingUsersId = processingUsersId + "," + user.id.toSring();
             }
             products3.map((e) => {
                 setRequestDetail(requestDetailEmpty);
                 requestDetail.id = e.id;
-                requestDetail.processingResults = e.processingResults;
-                requestDetail.observationResults = e.observationResults;
+                requestDetail.processingResults01 = e.processingResults01;
+                requestDetail.observationResults01 = e.observationResults01;
+                requestDetail.dateResults01 = e.dateResults01;
+                requestDetail.processingResults02 = e.processingResults02;
+                requestDetail.observationResults02 = e.observationResults02;
+                requestDetail.dateResults02 = e.dateResults02;
+                requestDetail.processingResults03 = e.processingResults03;
+                requestDetail.observationResults03 = e.observationResults03;
+                requestDetail.dateResults03 = e.dateResults03;
                 request.details.push(requestDetail);
             });
             saveRequest(request);
-            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Solicitud guardada exitosamente', life: 5000 });
+            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Procesamiento exitoso', life: 5000 });
+            setProcesamientoDialog(false);
+            //setUsuario(emptyUsuraio);
+        } else {
+            toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Ingrese toda la información', life: 5000 });
+        }
+    }
+
+    const saveSendSolicitud = () => {
+        setSubmitted(true);
+        async function changeStatus(chgSt) {
+            const reque = await EstadoService.changeStatus(chgSt);
+            setRequerimientos(reque);
+        }
+        if (tecnicaSeleccionado && submitted && reactivoSeleccionado) {
+            saveSolicitud();
+            chgStatus.requerimientoId = requerimientoId;
+            chgStatus.estadoId = 3;
+            changeStatus(chgStatus);
+            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Muestras enviadas para aprovación', life: 5000 });
             setProcesamientoDialog(false);
             //setUsuario(emptyUsuraio);
         } else {
@@ -283,7 +306,7 @@ export const Procesamiento = () => {
             setDateValueRequest(new Date(req.entryDate))
             setDateValueSample(new Date());
             setProducts2([]);
-            req.details.map((e, index) => { 
+            req.details.map((e, index) => {
                 products2.push({ "idNum": index + 1, ...e });
             });
             setProducts3(products2);
@@ -379,6 +402,17 @@ export const Procesamiento = () => {
             event.preventDefault();
     }
 
+    const setDateSeleccionadoMetodo = (options, e) => {
+        setDateValueSample(e.target.value);
+        options.value[options.rowIndex][options.field] = e.target.value.getDate() + '-' + (e.target.value.getMonth() + 1) + '-' + e.target.value.getFullYear();
+    }
+
+    const dateEditor = (options) => {
+        return (
+            <Calendar id="dateReques" showIcon showButtonBar value={dateValueSample} onChange={(e) => { setDateSeleccionadoMetodo(options, e); }}></Calendar>
+        );
+    }
+
     const textEditor = (options) => {
         return <InputText type="text" onChange={(e) => onInputTextChange(options, e)} />;
     }
@@ -386,21 +420,32 @@ export const Procesamiento = () => {
     const columns = [
         { field: 'idNum', header: 'Nº' },
         { field: 'placeCode', header: 'Id Muestra' },
-        { field: 'processingResults', header: 'Resultados' },
-        { field: 'observationResults', header: 'Observaciones' }
+        { field: 'dateResults01', header: 'Fecha 01' },
+        { field: 'processingResults01', header: 'Resultado 01' },
+        { field: 'observationResults01', header: 'Observaciones 01' },
+        { field: 'dateResults02', header: 'Fecha 02' },
+        { field: 'processingResults02', header: 'Resultado 02' },
+        { field: 'observationResults02', header: 'Observaciones 02' },
+        { field: 'dateResults03', header: 'Fecha 03' },
+        { field: 'processingResults03', header: 'Resultado 03' },
+        { field: 'observationResults03', header: 'Observaciones 03' }
     ];
 
     const cellEditor = (options) => {
-        if (options.field === 'processingResults' || options.field === 'observationResults')
+        if (options.field === 'processingResults01' || options.field === 'processingResults02' || options.field === 'processingResults03'
+        || options.field === 'observationResults01' || options.field === 'observationResults02' || options.field === 'observationResults03')
             return textEditor(options);
+        else if (options.field === 'dateResults01' || options.field === 'dateResults02' || options.field === 'dateResults03')
+        return dateEditor(options);
     }
 
     ////////////////////
 
     const requerimientoDialogFooter = (
         <>
-            <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
             <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={saveSolicitud} />
+            <Button label="Guardar y eviar para aprovación" icon="pi pi-check" className="p-button-text" onClick={saveSendSolicitud} />
+            <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
         </>
     );
 
@@ -430,8 +475,8 @@ export const Procesamiento = () => {
                             currentPageReportTemplate="Página {first} / {last} , {totalRecords} Requerimientos"
                             globalFilter={globalFilter} emptyMessage="Requerimientos no encontrados." header={header}>
                             <Column body={actionBodyTemplate} style={{ width: '6rem' }}></Column>
-                            <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '10rem' }}></Column>
-                            <Column field="entryDate" header="Fecha Procesamiento" sortable body={entryDateBodyTemplate} style={{ width: '7rem' }}></Column>
+                            <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '8rem' }}></Column>
+                            <Column field="entryDate" header="Fecha de Registro" sortable body={entryDateBodyTemplate} style={{ width: '7rem' }}></Column>
                             <Column field="project" header="Proyecto" sortable body={proyectoBodyTemplate} style={{ width: '15rem' }}></Column>
                             <Column field="analysis" header="Análisis" sortable body={analisisBodyTemplate} style={{ width: '7rem' }}></Column>
                             <Column field="typeSample" header="Tipo de Muestra" sortable body={typeSampleBodyTemplate} style={{ width: '7rem' }}></Column>
@@ -476,11 +521,6 @@ export const Procesamiento = () => {
                                             </div>
                                         </div>
                                         <div className="formgroup-inline">
-                                            <div className="col-2">
-                                                <label htmlFor="dateReques">Fecha del procesamiento</label>
-                                                <Calendar id="dateReques" showIcon showButtonBar value={dateValueSample} onChange={(e) => { setDateValueSample(e.target.value); }}></Calendar>
-                                                {submitted && !dateValueSample && <small className="p-invalid" >Fecha es requerido.</small>}
-                                            </div>
                                             <div className="col-3">
                                                 <label htmlFor="tecnicas">Técnica</label>
                                                 <AutoComplete placeholder="Buscar" id="tecnicas" dropdown value={tecnicaSeleccionado} onChange={(e) => { setTecnicaSeleccionadoMetodo(e); }} suggestions={tecnicaFiltrado} completeMethod={searchTecnica} field="name" />
@@ -505,7 +545,7 @@ export const Procesamiento = () => {
                                             {
                                                 columns.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
-                                                        style={{ width: (field === 'idNum') ? '2rem' : (field === 'placeCode') ? '8rem' : '27rem' }}
+                                                        style={{ width: (field === 'idNum') ? '2rem' : '8rem' }}
                                                         editor={(options) => cellEditor(options)} />
                                                 })
                                             }
