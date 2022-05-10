@@ -211,6 +211,11 @@ export const RequerimientosMuestras = () => {
     useEffect(() => {
         async function getRequerimientos() {
             const reque = await RequerimientoService.getRequerimientos();
+            reque.sort((a, b) => {
+                let x = a.status;
+                let y = b.status;
+                return (x < y) ? -1 : (x > y) ? 1 : 0;
+            });
             setRequerimientos(reque);
         }
         getRequerimientos();

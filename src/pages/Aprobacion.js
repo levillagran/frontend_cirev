@@ -13,7 +13,7 @@ import { InputSwitch } from 'primereact/inputswitch';
 import { Dropdown } from 'primereact/dropdown';
 import Moment from 'moment';
 
-import SecuenciacionService from '../service/SecuenciacionService';
+import AprobacionService from '../service/AprobacionService';
 import EstadoService from '../service/EstadoService';
 import CatalogoService from '../service/CatalogoService';
 
@@ -57,6 +57,7 @@ export const Aprobacion = () => {
 
     let emptyChangeStatus =
     {
+        userId: null,
         requerimientoId: null,
         estadoId: null
     };
@@ -73,6 +74,7 @@ export const Aprobacion = () => {
     const [dateValueShippAux, setDateValueShippAux] = useState(null);
     const [dateValueRecep, setDateValueRecep] = useState(null);
     const [processingUsersId, setProcessingUsersId] = useState("");
+    const [isSequence, setIsSequence] = useState(false);
 
     const [submitted, setSubmitted] = useState(false);
     const [procesamientoDialog, setProcesamientoDialog] = useState(false);
@@ -112,7 +114,8 @@ export const Aprobacion = () => {
 
     useEffect(() => {
         async function getRequerimientos() {
-            const reque = await SecuenciacionService.getSecuenciaciones();
+            const user = JSON.parse(localStorage.getItem('user'));
+            const reque = await AprobacionService.getAprobaciones(user.id);
             setRequerimientos(reque);
         }
         getRequerimientos();
@@ -126,7 +129,7 @@ export const Aprobacion = () => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Aprobación</h5>
+            <h5 className="m-0">Validación</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
@@ -136,38 +139,17 @@ export const Aprobacion = () => {
 
     const saveSolicitud = () => {
         setSubmitted(true);
-        async function saveRequest(request) {
-            const reque = await SecuenciacionService.saveSecuenciacion(request);
+        async function changeStatus(chgSt) {
+            const reque = await EstadoService.changeStatusValidator(chgSt);
             setRequerimientos(reque);
         }
         if (submitted) {
-            setRequest(requestEmpty);
-            request.id = requerimientoId;
-            request.shippingDate = dateValueShipp.getDate() + '-' + (dateValueShipp.getMonth() + 1) + '-' + dateValueShipp.getFullYear();
-            request.receptionDate = dateValueRecep.getDate() + '-' + (dateValueRecep.getMonth() + 1) + '-' + dateValueRecep.getFullYear();
-            //request.isShipping = isShipping;
-            request.observationShipping= obsShipp;
-            request.observationReception= obsRecep;
             const user = JSON.parse(localStorage.getItem('user'));
-            if (processingUsersId === "" || processingUsersId === null) {
-                request.processingUsersId = user.id.toString();
-            } else {
-                request.processingUsersId = processingUsersId + "," + user.id.toSring();
-            }
-            products3.map((e) => {
-                setRequestDetail(requestDetailEmpty);
-                requestDetail.id = e.id;
-                requestDetail.primer = e.primer;
-                requestDetail.sequence = e.sequence;
-                requestDetail.concentration = e.concentration;
-                requestDetail.isFasta = (e.isFasta === 'Sí' ? true : false);
-                requestDetail.quality = e.quality;
-                requestDetail.identity = e.identity;
-                requestDetail.organism = e.organism;
-                request.details.push(requestDetail);
-            });
-            saveRequest(request);
-            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Solicitud guardada exitosamente', life: 5000 });
+            chgStatus.userId = user.id;
+            chgStatus.requerimientoId = requerimientoId;
+            chgStatus.estadoId = 4;
+            changeStatus(chgStatus);
+            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Muestras validadas', life: 5000 });
             setProcesamientoDialog(false);
             //setUsuario(emptyUsuraio);
         } else {
@@ -175,18 +157,19 @@ export const Aprobacion = () => {
         }
     }
 
-    const saveSendSolicitud = () => {
+    const saveReplaySolicitud = () => {
         setSubmitted(true);
         async function changeStatus(chgSt) {
-            const reque = await EstadoService.changeStatus(chgSt);
+            const reque = await EstadoService.changeStatusValidator(chgSt);
             setRequerimientos(reque);
         }
         if (submitted) {
-            saveSolicitud();
+            const user = JSON.parse(localStorage.getItem('user')); 
+            chgStatus.userId = user.id;
             chgStatus.requerimientoId = requerimientoId;
-            chgStatus.estadoId = 3;
+            chgStatus.estadoId = 2;
             changeStatus(chgStatus);
-            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Muestras enviadas para aprovación', life: 5000 });
+            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Muestras validadas', life: 5000 });
             setProcesamientoDialog(false);
             //setUsuario(emptyUsuraio);
         } else {
@@ -196,7 +179,7 @@ export const Aprobacion = () => {
 
     const createDoc = (rowData) => {
         async function getConprovante() {
-            const comp = await SecuenciacionService.getCreateConprovante(rowData.id);
+            const comp = await AprobacionService.getCreateConprovante(rowData.id);
             if (comp !== null) {
                 setViewPdf(comp);
             }
@@ -210,13 +193,16 @@ export const Aprobacion = () => {
 
     const enterProcess = (request) => {
         async function getRequerimiento() {
-            const req = await SecuenciacionService.getSecuenciacion(request.id);
+            const req = await AprobacionService.getAprobacion(request.id);
             console.log(req)
             setProyectoSeleccionado({ "name": req.areaProject, "code": req.areaProjectId });
             setRequerimientoId(request.id);
             setProcessingUsersId(req.processingUsersId);
             setAnalisisSeleccionado({ "name": req.analysis, "code": req.analysisId });
-            //setIsShipping(req.isShipping);
+            setEspecificacionesSeleccionado({ "name": req.specification, "code": req.specificationId });
+            setIsSequence(req.isSequenced);
+            req.techniqueId ? setTecnicaSeleccionado({ "name": req.technique, "code": req.techniqueId }) : setTecnicaSeleccionado("");
+            req.kitReagentId ? setReactivoSeleccionado({ "name": req.kitReagent, "code": req.kitReagentId }) : setReactivoSeleccionado("");
             setObsShipp(req.observationShipping);
             setObsRecep(req.observationReception);
 
@@ -225,7 +211,6 @@ export const Aprobacion = () => {
 
             req.shippingDate ? setDateValueShipp(new Date(req.shippingDate)) : setDateValueShipp(new Date());
             req.shippingDate ? setDateValueShippAux(new Date(req.shippingDate)) : setDateValueShippAux(null);
-            console.log(dateValueShippAux)
             req.receptionDate ? setDateValueRecep(new Date(req.receptionDate)) : setDateValueRecep(new Date());
             setProducts2([]);
             req.details.map((e, index) => {
@@ -251,8 +236,7 @@ export const Aprobacion = () => {
     const actionBodyTemplate = (rowData) => {
         return (
             <div className="actions">
-                <Button icon="pi pi-filter" className="p-button-rounded p-button-success mr-1" title="Procesar" onClick={() => enterProcess(rowData)} style={{ height: '2rem', width: '2rem' }}></Button>
-                <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>
+                <Button icon="pi pi-check" className="p-button-rounded p-button-warning mr-1" title="Validar" onClick={() => enterProcess(rowData)} style={{ height: '2rem', width: '2rem' }}></Button>
             </div>
         );
     }
@@ -351,21 +335,31 @@ export const Aprobacion = () => {
         return <Dropdown value={aceptadoSeleccionado} options={condiciones} onChange={(e) => { onIsAcceptedChange(options, e.target.value); }} optionLabel="name" />;
     }
 
-    const columnsShipping = [
+    const columnsSecuenced = [
         { field: 'idNum', header: 'Nº' },
         { field: 'placeCode', header: 'Id Muestra' },
         { field: 'primer', header: 'Primer' },
         { field: 'sequence', header: 'Secuencia' },
         { field: 'concentration', header: 'Concentración' },
-    ];
-
-    const columnsReception = [
-        { field: 'idNum', header: 'Nº' },
-        { field: 'placeCode', header: 'Id Muestra' },
         { field: 'isFasta', header: 'FASTA' },
         { field: 'quality', header: 'Calidad' },
         { field: 'identity', header: 'Identidad' },
         { field: 'organism', header: 'Organismo' }
+    ];
+
+    const columns = [
+        { field: 'idNum', header: 'Nº' },
+        { field: 'placeCode', header: 'Id Muestra' },
+        { field: 'dateResults01', header: 'Fecha 01' },
+        { field: 'processingResults01', header: 'Resultado 01' },
+        { field: 'observationResults01', header: 'Observaciones 01' },
+        { field: 'dateResults02', header: 'Fecha 02' },
+        { field: 'processingResults02', header: 'Resultado 02' },
+        { field: 'observationResults02', header: 'Observaciones 02' },
+        { field: 'dateResults03', header: 'Fecha 03' },
+        { field: 'processingResults03', header: 'Resultado 03' },
+        { field: 'observationResults03', header: 'Observaciones 03' }
+        
     ];
 
     const cellEditor = (options) => {
@@ -383,8 +377,8 @@ export const Aprobacion = () => {
 
     const requerimientoDialogFooter = (
         <>
-            <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={saveSolicitud} />
-            <Button label="Guardar y enviar para aprovación" icon="pi pi-check" className="p-button-text" onClick={saveSendSolicitud} disabled={isShipping || !dateValueShippAux}/>
+            <Button label="Validar" icon="pi pi-check" className="p-button-text" onClick={saveSolicitud} />
+            <Button label="Regresar muestras" icon="pi pi-replay" className="p-button-text" onClick={saveReplaySolicitud} />
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
         </>
     );
@@ -414,7 +408,7 @@ export const Aprobacion = () => {
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Página {first} / {last} , {totalRecords} Requerimientos"
                             globalFilter={globalFilter} emptyMessage="Secuenciaciones no encontrados." header={header}>
-                            <Column body={actionBodyTemplate} style={{ width: '6rem' }}></Column>
+                            <Column body={actionBodyTemplate} style={{ width: '3rem' }}></Column>
                             <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '8rem' }}></Column>
                             <Column field="entryDate" header="Fecha de Registro" sortable body={entryDateBodyTemplate} style={{ width: '7rem' }}></Column>
                             <Column field="project" header="Proyecto" sortable body={proyectoBodyTemplate} style={{ width: '15rem' }}></Column>
@@ -429,17 +423,17 @@ export const Aprobacion = () => {
                             <div>
                                 <div className="flex">
                                     <div className="col-2 grid justify-content-center">
-                                        <img src='/assets/demo/images/galeriaSistema/secuencia.jpg' width="160rem" height="230rem" />
+                                        <img src='/assets/demo/images/galeriaSistema/aprobar.jpg' width="160rem" height="230rem" />
                                     </div>
                                     <div className="col-10">
-                                        <h3 className="m-0">Registro de secuenciación de muestras</h3>
+                                        <h3 className="m-0">Validación de resultados de muestras</h3>
                                         <div className="formgroup-inline">
                                             <div className="col-2">
                                                 <label >Fecha requerimiento</label>
                                                 <br />
                                                 <label className="text-500">{Moment(dateValueRequest).format('DD-MM-YYYY')}</label>
                                             </div>
-                                            <div className="col-3">
+                                            <div className="col-4">
                                                 <label >Proyecto de investigación</label>
                                                 <br />
                                                 {proyectoSeleccionado && <label className="text-500">{proyectoSeleccionado.name}</label>}
@@ -450,54 +444,49 @@ export const Aprobacion = () => {
                                                 {analisisSeleccionado && <label className="text-500">{analisisSeleccionado.name}</label>}
                                             </div>
                                             <div className="col-2">
+                                                <label htmlFor="name">Especificación del analisis</label>
+                                                <br />
+                                                {especificacionSeleccionado && <label className="text-500">{especificacionSeleccionado.name}</label>}
+                                            </div>
+                                            <div className="col-2">
                                                 <label htmlFor="name">Tipo de muestra</label>
                                                 <br />
                                                 {tipoMuestraSeleccionado && <label className="text-500">{tipoMuestraSeleccionado.name}</label>}
                                             </div>
-                                            {dateValueShippAux && <div className="col-2">
-                                                <label >Fecha Envio</label>
-                                                <br />
-                                                <label className="text-500">{Moment(dateValueShippAux).format('DD-MM-YYYY')}</label>
-                                            </div>}
                                         </div>
                                         <div className="formgroup-inline">
-                                            <div className="col-2">
-                                                <label htmlFor="name">Tipo</label>
-                                                <div className="flex">
-                                                    <div className="col-12 md:col-6">
-                                                        <div className="field-radiobutton">
-                                                            <RadioButton inputId="option1" name="option" checked={isShipping} onChange={(e) => setIsShipping(true)} />
-                                                            <label htmlFor="option1">Envío</label>
-                                                        </div>
-                                                    </div>
-                                                    <div className="col-12 md:col-6">
-                                                        <div className="field-radiobutton">
-                                                            <RadioButton inputId="option2" name="option" checked={!isShipping} onChange={(e) => setIsShipping(false)} />
-                                                            <label htmlFor="option2">Recepción</label>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                            {!isSequence && <><div className="col-3">
+                                                <label>Técnica</label>
+                                                <br />
+                                                {tecnicaSeleccionado && <label className="text-500">{tecnicaSeleccionado.name}</label>}
                                             </div>
-                                            {isShipping && <div className="col-2">
+                                            <div className="col-3">
+                                                <label h>Kit/Reactivos</label>
+                                                <br />
+                                                {reactivoSeleccionado && <label className="text-500">{reactivoSeleccionado.name}</label>}
+                                            </div>
+                                            </>}
+                                            {isSequence && <><div className="col-2">
                                                 <label htmlFor="dateReques">Fecha Envio</label>
-                                                <Calendar id="dateReques" showIcon showButtonBar value={dateValueShipp} onChange={(e) => { setDateValueShipp(e.target.value); }}></Calendar>
-                                                {submitted && !dateValueShipp && <small className="p-invalid" >Fecha es requerido.</small>}
-                                            </div>}
-                                            {!isShipping && <div className="col-2">
+                                                <br />
+                                                <label className="text-500">{Moment(dateValueShipp).format('DD-MM-YYYY')}</label>
+                                            </div>
+                                            <div className="col-2">
                                                 <label htmlFor="dateReques">Fecha Recepción</label>
-                                                <Calendar id="dateReques" showIcon showButtonBar value={dateValueRecep} onChange={(e) => { setDateValueRecep(e.target.value); }}></Calendar>
-                                                {submitted && !dateValueRecep && <small className="p-invalid" >Fecha es requerido.</small>}
-                                            </div>}
-                                            {isShipping && <div className="col-4">
+                                                <br />
+                                                <label className="text-500">{Moment(dateValueRecep).format('DD-MM-YYYY')}</label>
+                                            </div>
+                                            <div className="col-4">
                                                 <label htmlFor="obser">Observaciones Envio</label>
-                                                <small> (opcional)</small>
-                                                <InputTextarea id="obser" value={obsShipp} onChange={(e) => onObsShippChange(e)} rows={1} cols={20} autoResize />
-                                            </div>}
-                                            {!isShipping && <div className="col-4">
+                                                <br />
+                                                <label className="text-500">{obsShipp}</label>
+                                            </div>
+                                            <div className="col-4">
                                                 <label htmlFor="obser">Observaciones Recepción</label>
-                                                <small> (opcional)</small>
-                                                <InputTextarea id="obser" value={obsRecep} onChange={(e) => onObsRecepChange(e)} rows={1} cols={20} autoResize />
-                                            </div>}
+                                                <br />
+                                                <label className="text-500">{obsRecep}</label>
+                                            </div>
+                                            </>}
                                         </div>
                                     </div>
                                 </div>
@@ -508,18 +497,18 @@ export const Aprobacion = () => {
                                     <div className="p-fluid mt-2">
                                         <DataTable value={products3} editMode="cell" className="editable-cells-table" rowHover scrollable inline style={{ fontSize: '14px', textAlign: 'center' }}
                                             emptyMessage="Ninguna muestra agragada.">
-                                            {isShipping &&
-                                                columnsShipping.map(({ field, header }) => {
+                                            {isSequence &&
+                                                columnsSecuenced.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
                                                         style={{ width: (field === 'idNum') ? '2rem' : (field === 'placeCode') ? '8rem' : (field === 'quality' || field === 'isFasta' || field === 'identity') ? '8rem' : '15rem' }}
-                                                        editor={(options) => cellEditor(options)} />
+                                                         />
                                                 })
                                             }
-                                            {!isShipping &&
-                                                columnsReception.map(({ field, header }) => {
+                                            {!isSequence &&
+                                                columns.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
                                                         style={{ width: (field === 'idNum') ? '2rem' : (field === 'placeCode') ? '8rem' : (field === 'quality' || field === 'isFasta' || field === 'identity') ? '8rem' : '15rem' }}
-                                                        editor={(options) => cellEditor(options)} />
+                                                         />
                                                 })
                                             }
                                         </DataTable>

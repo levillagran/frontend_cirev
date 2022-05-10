@@ -211,7 +211,6 @@ export const Secuenciacion = () => {
     const enterProcess = (request) => {
         async function getRequerimiento() {
             const req = await SecuenciacionService.getSecuenciacion(request.id);
-            console.log(req)
             setProyectoSeleccionado({ "name": req.areaProject, "code": req.areaProjectId });
             setRequerimientoId(request.id);
             setProcessingUsersId(req.processingUsersId);
@@ -225,7 +224,6 @@ export const Secuenciacion = () => {
 
             req.shippingDate ? setDateValueShipp(new Date(req.shippingDate)) : setDateValueShipp(new Date());
             req.shippingDate ? setDateValueShippAux(new Date(req.shippingDate)) : setDateValueShippAux(null);
-            console.log(dateValueShippAux)
             req.receptionDate ? setDateValueRecep(new Date(req.receptionDate)) : setDateValueRecep(new Date());
             setProducts2([]);
             req.details.map((e, index) => {
@@ -439,7 +437,7 @@ export const Secuenciacion = () => {
                                                 <br />
                                                 <label className="text-500">{Moment(dateValueRequest).format('DD-MM-YYYY')}</label>
                                             </div>
-                                            <div className="col-3">
+                                            <div className="col-4">
                                                 <label >Proyecto de investigación</label>
                                                 <br />
                                                 {proyectoSeleccionado && <label className="text-500">{proyectoSeleccionado.name}</label>}
@@ -461,7 +459,7 @@ export const Secuenciacion = () => {
                                             </div>}
                                         </div>
                                         <div className="formgroup-inline">
-                                            <div className="col-2">
+                                            <div className="col-3">
                                                 <label htmlFor="name">Tipo</label>
                                                 <div className="flex">
                                                     <div className="col-12 md:col-6">

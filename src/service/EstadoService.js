@@ -9,6 +9,12 @@ class EstadoService {
     .post(baseURL() + "estados/changeStatus", data, { headers: authHeader() });
     return res.data;
   }
+
+  async changeStatusValidator(data) {
+    const res = await axios
+    .post(baseURL() + "estados/changeStatusValidator", data, { headers: authHeader() });
+    return res.data;
+  }
   
 }
 
