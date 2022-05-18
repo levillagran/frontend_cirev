@@ -97,7 +97,7 @@ export const RequerimientosMuestras = () => {
     };
 
     let condiciones = [
-        { name: 'Sí', code: true },
+        { name: 'Si', code: true },
         { name: 'No', code: false }
     ];
 
@@ -339,12 +339,11 @@ export const RequerimientosMuestras = () => {
     );
 
     const saveSolicitud = () => {
-        setSubmitted(true);
         async function saveRequest(request) {
             const reque = await RequerimientoService.saveRequerimiento(request);
             setRequerimientos(reque);
         }
-        if (products3.length > 0 && especificacionSeleccionado && submitted && usuarioSeleccionado && tipoMuestraSeleccionado) {
+        if (products3.length > 0 && especificacionSeleccionado && usuarioSeleccionado && tipoMuestraSeleccionado) {
             setRequest(requestEmpty);
             request.id = requerimientoId;
             request.entryDate = dateValueRequest.getDate() + '-' + (dateValueRequest.getMonth() + 1) + '-' + dateValueRequest.getFullYear();
@@ -358,32 +357,30 @@ export const RequerimientosMuestras = () => {
             request.requerimentUserId = usuarioSeleccionado.code;
             const user = JSON.parse(localStorage.getItem('user'));
             request.receptionUserId = user.id;
-
             products3.map((e) => {
-                setRequestDetail(requestDetailEmpty);
-                requestDetail.id = e.id;
-                requestDetail.placeCode = e.placeCode;
-                requestDetail.collectionDate = e.collectionDate;
-                requestDetail.taxonomicId = e.taxonomicId;
-                requestDetail.provinceId = e.provinceId;
-                requestDetail.cantonId = e.cantonId;
-                requestDetail.parishId = e.parishId;
-                requestDetail.latitude = e.latitude;
-                requestDetail.longitude = e.longitude;
-                requestDetail.genderId = e.genderId;
-                requestDetail.isPreprocessed = e.isPreprocessed;
-                requestDetail.isAccepted = e.isAccepted;
-                requestDetail.reazonNoAccepted = e.reazonNoAccepted;
-                requestDetail.storageId = e.storageId;
-                requestDetail.numberBox = e.box;
-                requestDetail.yearCode = e.year;
-                requestDetail.observationSampleDetail = e.observations;
-                request.details.push(requestDetail);
+                request.details.push({
+                    "id": e.id,
+                    "placeCode": e.placeCode,
+                    "collectionDate": e.collectionDate,
+                    "taxonomicId": e.taxonomicId,
+                    "provinceId": e.provinceId,
+                    "cantonId": e.cantonId,
+                    "parishId": e.parishId,
+                    "latitude": e.latitude,
+                    "longitude": e.longitude,
+                    "genderId": e.genderId,
+                    "isPreprocessed": e.isPreprocessed === "Si" ? true : false,
+                    "isAccepted": e.isAccepted === "Si" ? true : false,
+                    "reazonNoAccepted": e.reazonNoAccepted,
+                    "storageId": e.storageId,
+                    "numberBox": e.box,
+                    "yearCode": e.year,
+                    "observationSampleDetail": e.observations
+                });
             });
             saveRequest(request);
             toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Solicitud guardada exitosamente', life: 5000 });
             setSolicitudDialog(false);
-            //setUsuario(emptyUsuraio);
         } else {
             toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Ingrese toda la información', life: 5000 });
         }

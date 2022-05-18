@@ -11,6 +11,7 @@ class RequerimientoService {
   }
 
   async saveRequerimiento(data) {
+    console.log(data)
     const res = await axios
     .post(baseURL() + "requerimientos/save", data, { headers: authHeader() });
     return res.data;
