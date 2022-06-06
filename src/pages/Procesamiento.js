@@ -165,23 +165,26 @@ export const Procesamiento = () => {
             request.kitReagentId = reactivoSeleccionado.code;
             const user = JSON.parse(localStorage.getItem('user'));
             if (processingUsersId === "" || processingUsersId === null) {
-                request.processingUsersId = user.id.toString();
+                request.processingUsersId = user.id;
             } else {
-                request.processingUsersId = processingUsersId + "," + user.id.toSring();
+                request.processingUsersId = processingUsersId + "," + user.id;
             }
+            let uniq = [...new Set(request.processingUsersId.split(","))]
+            request.processingUsersId = uniq.join();
             products3.map((e) => {
                 setRequestDetail(requestDetailEmpty);
-                requestDetail.id = e.id;
-                requestDetail.processingResults01 = e.processingResults01;
-                requestDetail.observationResults01 = e.observationResults01;
-                requestDetail.dateResults01 = e.dateResults01;
-                requestDetail.processingResults02 = e.processingResults02;
-                requestDetail.observationResults02 = e.observationResults02;
-                requestDetail.dateResults02 = e.dateResults02;
-                requestDetail.processingResults03 = e.processingResults03;
-                requestDetail.observationResults03 = e.observationResults03;
-                requestDetail.dateResults03 = e.dateResults03;
-                request.details.push(requestDetail);
+                request.details.push({
+                    "id": e.id,
+                    "processingResults01": e.processingResults01,
+                    "observationResults01": e.observationResults01,
+                    "dateResults01": e.dateResults01,
+                    "processingResults02": e.processingResults02,
+                    "observationResults02": e.observationResults02,
+                    "dateResults02": e.dateResults02,
+                    "processingResults03": e.processingResults03,
+                    "observationResults03": e.observationResults03,
+                    "dateResults03": e.dateResults03,
+                });
             });
             saveRequest(request);
             toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Procesamiento exitoso', life: 5000 });
@@ -196,7 +199,7 @@ export const Procesamiento = () => {
         setSubmitted(true);
         async function changeStatus(chgSt) {
             const reque = await EstadoService.changeStatus(chgSt);
-            setRequerimientos(reque);
+            //setRequerimientos(reque);
         }
         if (tecnicaSeleccionado && submitted && reactivoSeleccionado) {
             saveSolicitud();
@@ -320,7 +323,7 @@ export const Procesamiento = () => {
         return (
             <div className="actions">
                 <Button icon="pi pi-filter" className="p-button-rounded p-button-success mr-1" title="Procesar" onClick={() => enterProcess(rowData)} style={{ height: '2rem', width: '2rem' }}></Button>
-                <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>
+                {/* <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button> */}
             </div>
         );
     }
@@ -433,10 +436,10 @@ export const Procesamiento = () => {
 
     const cellEditor = (options) => {
         if (options.field === 'processingResults01' || options.field === 'processingResults02' || options.field === 'processingResults03'
-        || options.field === 'observationResults01' || options.field === 'observationResults02' || options.field === 'observationResults03')
+            || options.field === 'observationResults01' || options.field === 'observationResults02' || options.field === 'observationResults03')
             return textEditor(options);
         else if (options.field === 'dateResults01' || options.field === 'dateResults02' || options.field === 'dateResults03')
-        return dateEditor(options);
+            return dateEditor(options);
     }
 
     ////////////////////
@@ -474,7 +477,7 @@ export const Procesamiento = () => {
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Página {first} / {last} , {totalRecords} Requerimientos"
                             globalFilter={globalFilter} emptyMessage="Requerimientos no encontrados." header={header}>
-                            <Column body={actionBodyTemplate} style={{ width: '6rem' }}></Column>
+                            <Column body={actionBodyTemplate} style={{ width: '3rem' }}></Column>
                             <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '8rem' }}></Column>
                             <Column field="entryDate" header="Fecha de Registro" sortable body={entryDateBodyTemplate} style={{ width: '7rem' }}></Column>
                             <Column field="project" header="Proyecto" sortable body={proyectoBodyTemplate} style={{ width: '15rem' }}></Column>

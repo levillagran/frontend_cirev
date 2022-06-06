@@ -27,7 +27,7 @@ import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { Worker } from '@react-pdf-viewer/core';
 
-export const Reportes = () => {
+export const ReporteResultados = () => {
 
     let requestEmpty =
     {

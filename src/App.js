@@ -27,7 +27,8 @@ import { RequerimientosMuestras } from './pages/RequerimientosMuestras';
 import { Procesamiento } from './pages/Procesamiento';
 import { Secuenciacion } from './pages/Secuenciacion';
 import { Aprobacion } from './pages/Aprobacion';
-import { Reportes } from './pages/Reportes';
+import { ReporteProcesamiento } from './pages/ReporteProcesamiento';
+import { ReporteResultados } from './pages/ReporteResultados';
 
 const App = () => {
 
@@ -210,7 +211,8 @@ const App = () => {
                     <Route path="/app/procesamiento" component={Procesamiento} exact />
                     <Route path="/app/secuenciacion" component={Secuenciacion} exact />
                     <Route path="/app/aprobacion" component={Aprobacion} exact />
-                    <Route path="/app/reporteResultados" component={Reportes} exact />
+                    <Route path="/app/reporteProcesamiento" component={ReporteProcesamiento} exact />
+                    <Route path="/app/reporteResultados" component={ReporteResultados} exact />
                 </div>
                 <AppFooter layoutColorMode={layoutColorMode} />
             </div>

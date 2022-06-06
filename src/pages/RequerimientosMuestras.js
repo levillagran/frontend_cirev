@@ -216,6 +216,7 @@ export const RequerimientosMuestras = () => {
                 let y = b.status;
                 return (x < y) ? -1 : (x > y) ? 1 : 0;
             });
+            
             setRequerimientos(reque);
         }
         getRequerimientos();
@@ -264,6 +265,7 @@ export const RequerimientosMuestras = () => {
         setDateValueSample(fechaActual);
         setSubmitted(false);
         setSolicitudDialog(true);
+        setRequerimientoId(null);
     }
 
     const loadCatalog = () => {
@@ -339,6 +341,7 @@ export const RequerimientosMuestras = () => {
     );
 
     const saveSolicitud = () => {
+        setSubmitted(true);
         async function saveRequest(request) {
             const reque = await RequerimientoService.saveRequerimiento(request);
             setRequerimientos(reque);
@@ -590,12 +593,6 @@ export const RequerimientosMuestras = () => {
         options.value[options.rowIndex]['taxonomicId'] = taxonomia.value.code;
     }
 
-    const setGeneroSeleccionadoMetodo = (options, genero) => {
-        setGeneroSeleccionado(genero.value);
-        options.value[options.rowIndex][options.field] = genero.value.name;
-        options.value[options.rowIndex]['genderId'] = genero.value.code;
-    }
-
     const setDateSeleccionadoMetodo = (options, e) => {
         setDateValueSample(e.target.value);
         options.value[options.rowIndex][options.field] = e.target.value.getDate() + '-' + (e.target.value.getMonth() + 1) + '-' + e.target.value.getFullYear();
@@ -658,6 +655,26 @@ export const RequerimientosMuestras = () => {
                 setAlmacenEnable(false);
             }
             getAlmacen();
+            async function getAnalisis() {
+                const analisis = await CatalogoService.getAnalisis(req.areaProjectId);
+                const ana = [];
+                analisis.map((e) => {
+                    ana.push({ "name": e.name, "code": e.id });
+                });
+                setAnalisis(ana);
+                setAnalisisEnable(false);
+            }
+            getAnalisis();
+            async function getEspecificaciones() {
+                const espec = await CatalogoService.getEspecificaciones(req.analysisId);
+                const espe = [];
+                espec.map((e) => {
+                    espe.push({ "name": e.name, "code": e.id });
+                });
+                setEspecificaciones(espe);
+                setEspecificacionesEnable(false);
+            }
+            getEspecificaciones();
             setAlmacenEnable(false);
             setRequerimientoId(request.id);
             setAnalisisEnable(false);
@@ -673,8 +690,17 @@ export const RequerimientosMuestras = () => {
             setDateValueRequest(new Date(req.entryDate));
             setDateValueSample('');
             setAlmacenEnable(false);
+            setProducts1([]);
             setProducts2([]);
-            req.details.map((e, index) => {
+            req.details.map(e => {
+                products1.push(e);
+            });
+            products1.sort((a, b) => {
+                let x = a.id;
+                let y = b.id;
+                return (x < y) ? -1 : (x > y) ? 1 : 0;
+            });
+            products1.map((e, index) => {
                 products2.push({ "idNum": index + 1, ...e });
             });
             setProducts3(products2);
@@ -758,7 +784,8 @@ export const RequerimientosMuestras = () => {
                 {rowData.status === "Creado" && <Button icon="pi pi-pencil" className="p-button-rounded p-button-warning mr-1" title="Editar requerimiento" onClick={() => editRequest(rowData)} style={{ height: '2rem', width: '2rem' }}></Button>}
                 {rowData.status === "Creado" && <Button icon="pi pi-upload" className="p-button-rounded p-button-success mr-1" onClick={() => loadDoc(rowData)} title="Subir documento" style={{ height: '2rem', width: '2rem' }}></Button>}
                 <Button icon="pi pi-eye" className="p-button-rounded p-button-info mr-1" onClick={() => viewDoc(rowData)} title="Ver documento" style={{ height: '2rem', width: '2rem' }}></Button>
-                {rowData.status === "Creado" && <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>}
+                <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>
+                {/* {rowData.status === "Creado" && <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>} */}
             </div>
         );
     }
@@ -880,6 +907,7 @@ export const RequerimientosMuestras = () => {
     }
 
     ////////////////////
+    const [products1, setProducts1] = useState([]);
     const [products2, setProducts2] = useState([]);
     const [products3, setProducts3] = useState([]);
 
@@ -895,14 +923,20 @@ export const RequerimientosMuestras = () => {
         setNumSample(numSample - 1);
     }
 
-    const onIsAcceptedChange = (options, e) => {
-        setAceptadoSeleccionado(e);
-        options.value[options.rowIndex][options.field] = e.name;
+    const setGeneroSeleccionadoMetodo = (options, genero) => {
+        setGeneroSeleccionado(genero.value);
+        options.value[options.rowIndex][options.field] = genero.value.name;
+        options.value[options.rowIndex]['genderId'] = genero.value.code;
     }
 
-    const onIsPreprocessedChange = (options, e) => {
-        setPreproSeleccionado(e);
-        options.value[options.rowIndex][options.field] = e.name;
+    const onIsAcceptedChange = (options, accept) => {
+        setAceptadoSeleccionado(accept.value);
+        options.value[options.rowIndex][options.field] = accept.value.name;
+    }
+
+    const onIsPreprocessedChange = (options, pre) => {
+        setPreproSeleccionado(pre.value);
+        options.value[options.rowIndex][options.field] = pre.value.name;
     }
 
     const onInputTextChange = (options, e) => {
@@ -1011,13 +1045,13 @@ export const RequerimientosMuestras = () => {
 
     const isAcceptedEditor = (options) => {
         return (
-            <Dropdown value={aceptadoSeleccionado} options={condiciones} onChange={(e) => { onIsAcceptedChange(options, e.target.value); }} optionLabel="name" />
+            <Dropdown value={aceptadoSeleccionado} options={condiciones} onChange={(e) => { onIsAcceptedChange(options, e); }} optionLabel="name" />
         );
     }
 
     const isPreprocessedEditor = (options) => {
         return (
-            <Dropdown value={preproSeleccionado} options={condiciones} onChange={(e) => onIsPreprocessedChange(options, e.target.value)} optionLabel="name" />
+            <Dropdown value={preproSeleccionado} options={condiciones} onChange={(e) => {onIsPreprocessedChange(options, e); }} optionLabel="name" />
         );
     }
 
