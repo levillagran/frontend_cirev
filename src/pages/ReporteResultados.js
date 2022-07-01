@@ -118,7 +118,7 @@ export const ReporteResultados = () => {
             request.id = requerimientoId;
             request.reportDate = dateValueRequest.getDate() + '-' + (dateValueRequest.getMonth() + 1) + '-' + dateValueRequest.getFullYear();
             request.reportResults = results;
-            request.observationsReport= obsResults;
+            request.observationsReport = obsResults;
             const user = JSON.parse(localStorage.getItem('user'));
             request.reportByUserId = user.id;
             saveRequest(request);
@@ -227,9 +227,9 @@ export const ReporteResultados = () => {
         return (
             <div className="actions">
                 <Button icon="pi pi-pencil" className="p-button-rounded p-button-warning mr-1" title="Editar requerimiento" onClick={() => editRequest(rowData)} style={{ height: '2rem', width: '2rem' }}></Button>
+                <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>
                 <Button icon="pi pi-upload" className="p-button-rounded p-button-success mr-1" onClick={() => loadDoc(rowData)} title="Subir documento" style={{ height: '2rem', width: '2rem' }}></Button>
                 <Button icon="pi pi-eye" className="p-button-rounded p-button-info mr-1" onClick={() => viewDoc(rowData)} title="Ver documento" style={{ height: '2rem', width: '2rem' }}></Button>
-                <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>
             </div>
         );
     }
@@ -388,7 +388,7 @@ export const ReporteResultados = () => {
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Página {first} / {last} , {totalRecords} Requerimientos"
                             globalFilter={globalFilter} emptyMessage="Requerimientos no encontrados." header={header}>
-                            <Column body={actionBodyTemplate} style={{ width: '11rem' }}></Column>
+                            <Column body={actionBodyTemplate} style={{ width: '7rem' }}></Column>
                             <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '10rem' }}></Column>
                             <Column field="entryDate" header="Fecha Ingreso" sortable body={entryDateBodyTemplate} style={{ width: '6rem' }}></Column>
                             <Column field="project" header="Proyecto" sortable body={proyectoBodyTemplate} style={{ width: '15rem' }}></Column>
@@ -444,7 +444,7 @@ export const ReporteResultados = () => {
                                             <div className="col-5">
                                                 <label htmlFor="obser">Resultados</label>
                                                 <InputTextarea id="obser" value={results} onChange={(e) => onResultsChange(e)} rows={1} cols={20} autoResize />
-                                                {submitted && !results && <small className="p-invalid" style={{color: "#ef9a9a"}}>Ingrese resultados.</small>}
+                                                {submitted && !results && <small className="p-invalid" style={{ color: "#ef9a9a" }}>Ingrese resultados.</small>}
                                             </div>
                                             <div className="col-4">
                                                 <label htmlFor="obser">Observaciones</label>

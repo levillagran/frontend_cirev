@@ -95,12 +95,16 @@ export const Aprobacion = () => {
 
     const [tecnicas, setTecnicas] = useState(null);
     const [tecnicaFiltrado, setTecnicaFiltrado] = useState([]);
-    const [tecnicaSeleccionado, setTecnicaSeleccionado] = useState(null);
+    const [tecnica01Seleccionado, setTecnica01Seleccionado] = useState(null);
+    const [tecnica02Seleccionado, setTecnica02Seleccionado] = useState(null);
+    const [tecnica03Seleccionado, setTecnica03Seleccionado] = useState(null);
 
     const [reactivosEnable, setReactivosEnable] = useState(true);
     const [reactivos, setReactivos] = useState(null);
     const [reactivoFiltrado, setReactivoFiltrado] = useState([]);
-    const [reactivoSeleccionado, setReactivoSeleccionado] = useState(null);
+    const [reactivo01Seleccionado, setReactivo01Seleccionado] = useState(null);
+    const [reactivo02Seleccionado, setReactivo02Seleccionado] = useState(null);
+    const [reactivo03Seleccionado, setReactivo03Seleccionado] = useState(null);
 
     const [request, setRequest] = useState(requestEmpty);
     const [requestDetail, setRequestDetail] = useState(requestDetailEmpty);
@@ -164,7 +168,7 @@ export const Aprobacion = () => {
             setRequerimientos(reque);
         }
         if (submitted) {
-            const user = JSON.parse(localStorage.getItem('user')); 
+            const user = JSON.parse(localStorage.getItem('user'));
             chgStatus.userId = user.id;
             chgStatus.requerimientoId = requerimientoId;
             chgStatus.estadoId = 2;
@@ -201,8 +205,12 @@ export const Aprobacion = () => {
             setAnalisisSeleccionado({ "name": req.analysis, "code": req.analysisId });
             setEspecificacionesSeleccionado({ "name": req.specification, "code": req.specificationId });
             setIsSequence(req.isSequenced);
-            req.techniqueId ? setTecnicaSeleccionado({ "name": req.technique, "code": req.techniqueId }) : setTecnicaSeleccionado("");
-            req.kitReagentId ? setReactivoSeleccionado({ "name": req.kitReagent, "code": req.kitReagentId }) : setReactivoSeleccionado("");
+            req.technique01Id ? setTecnica01Seleccionado({ "name": req.technique01, "code": req.technique01Id }) : setTecnica01Seleccionado("");
+            req.kitReagent01Id ? setReactivo01Seleccionado({ "name": req.kitReagent01, "code": req.kitReagent01Id }) : setReactivo01Seleccionado("");
+            req.technique02Id ? setTecnica02Seleccionado({ "name": req.technique02, "code": req.technique02Id }) : setTecnica02Seleccionado("");
+            req.kitReagent02Id ? setReactivo02Seleccionado({ "name": req.kitReagent02, "code": req.kitReagent02Id }) : setReactivo02Seleccionado("");
+            req.technique03Id ? setTecnica03Seleccionado({ "name": req.technique03, "code": req.technique03Id }) : setTecnica03Seleccionado("");
+            req.kitReagent03Id ? setReactivo03Seleccionado({ "name": req.kitReagent03, "code": req.kitReagent03Id }) : setReactivo03Seleccionado("");
             setObsShipp(req.observationShipping);
             setObsRecep(req.observationReception);
 
@@ -213,6 +221,11 @@ export const Aprobacion = () => {
             req.shippingDate ? setDateValueShippAux(new Date(req.shippingDate)) : setDateValueShippAux(null);
             req.receptionDate ? setDateValueRecep(new Date(req.receptionDate)) : setDateValueRecep(new Date());
             setProducts2([]);
+            req.details.sort((a, b) => {
+                let x = a.id;
+                let y = b.id;
+                return (x < y) ? -1 : (x > y) ? 1 : 0;
+            });
             req.details.map((e, index) => {
                 products2.push({ "idNum": index + 1, ...e });
             });
@@ -350,16 +363,16 @@ export const Aprobacion = () => {
     const columns = [
         { field: 'idNum', header: 'Nº' },
         { field: 'placeCode', header: 'Id Muestra' },
-        { field: 'dateResults01', header: 'Fecha 01' },
-        { field: 'processingResults01', header: 'Resultado 01' },
-        { field: 'observationResults01', header: 'Observaciones 01' },
-        { field: 'dateResults02', header: 'Fecha 02' },
-        { field: 'processingResults02', header: 'Resultado 02' },
-        { field: 'observationResults02', header: 'Observaciones 02' },
-        { field: 'dateResults03', header: 'Fecha 03' },
-        { field: 'processingResults03', header: 'Resultado 03' },
-        { field: 'observationResults03', header: 'Observaciones 03' }
-        
+        { field: 'dateResults01', header: 'Fecha porceso 01' },
+        { field: 'processingResults01', header: 'Resultado porceso 01' },
+        { field: 'observationResults01', header: 'Observaciones porceso 01' },
+        { field: 'dateResults02', header: 'Fecha porceso 02' },
+        { field: 'processingResults02', header: 'Resultado porceso 02' },
+        { field: 'observationResults02', header: 'Observaciones porceso 02' },
+        { field: 'dateResults03', header: 'Fecha porceso 03' },
+        { field: 'processingResults03', header: 'Resultado porceso 03' },
+        { field: 'observationResults03', header: 'Observaciones porceso 03' }
+
     ];
 
     const cellEditor = (options) => {
@@ -455,37 +468,73 @@ export const Aprobacion = () => {
                                             </div>
                                         </div>
                                         <div className="formgroup-inline">
-                                            {!isSequence && <><div className="col-3">
+                                            {!isSequence && <><div className="col-4">
+                                                <label style={{color: "red"}}>Proceso 01</label>
+                                            </div>
+                                            </>}
+                                            {!isSequence && tecnica02Seleccionado && <><div className="col-4">
+                                                <label style={{color: "red"}}>Proceso 02</label>
+                                            </div>
+                                            </>}
+                                            {!isSequence && tecnica03Seleccionado && <><div className="col-4">
+                                                <label style={{color: "red"}}>Proceso 03</label>
+                                            </div>
+                                            </>}
+                                        </div>
+                                        <div className="formgroup-inline">
+                                            {!isSequence && <><div className="col-2">
                                                 <label>Técnica</label>
                                                 <br />
-                                                {tecnicaSeleccionado && <label className="text-500">{tecnicaSeleccionado.name}</label>}
+                                                {tecnica01Seleccionado && <label className="text-500">{tecnica01Seleccionado.name}</label>}
                                             </div>
-                                            <div className="col-3">
-                                                <label h>Kit/Reactivos</label>
+                                                <div className="col-2">
+                                                    <label h>Kit/Reactivos</label>
+                                                    <br />
+                                                    {reactivo01Seleccionado && <label className="text-500">{reactivo01Seleccionado.name}</label>}
+                                                </div>
+                                            </>}
+                                            {!isSequence && tecnica02Seleccionado && <><div className="col-2">
+                                                <label>Técnica</label>
                                                 <br />
-                                                {reactivoSeleccionado && <label className="text-500">{reactivoSeleccionado.name}</label>}
+                                                {tecnica02Seleccionado && <label className="text-500">{tecnica02Seleccionado.name}</label>}
                                             </div>
+                                                <div className="col-2">
+                                                    <label h>Kit/Reactivos</label>
+                                                    <br />
+                                                    {reactivo02Seleccionado && <label className="text-500">{reactivo02Seleccionado.name}</label>}
+                                                </div>
+                                            </>}
+                                            {!isSequence && tecnica03Seleccionado && <><div className="col-2">
+                                                <label>Técnica</label>
+                                                <br />
+                                                {tecnica03Seleccionado && <label className="text-500">{tecnica03Seleccionado.name}</label>}
+                                            </div>
+                                                <div className="col-2">
+                                                    <label h>Kit/Reactivos</label>
+                                                    <br />
+                                                    {reactivo03Seleccionado && <label className="text-500">{reactivo03Seleccionado.name}</label>}
+                                                </div>
                                             </>}
                                             {isSequence && <><div className="col-2">
                                                 <label htmlFor="dateReques">Fecha Envio</label>
                                                 <br />
                                                 <label className="text-500">{Moment(dateValueShipp).format('DD-MM-YYYY')}</label>
                                             </div>
-                                            <div className="col-2">
-                                                <label htmlFor="dateReques">Fecha Recepción</label>
-                                                <br />
-                                                <label className="text-500">{Moment(dateValueRecep).format('DD-MM-YYYY')}</label>
-                                            </div>
-                                            <div className="col-4">
-                                                <label htmlFor="obser">Observaciones Envio</label>
-                                                <br />
-                                                <label className="text-500">{obsShipp}</label>
-                                            </div>
-                                            <div className="col-4">
-                                                <label htmlFor="obser">Observaciones Recepción</label>
-                                                <br />
-                                                <label className="text-500">{obsRecep}</label>
-                                            </div>
+                                                <div className="col-2">
+                                                    <label htmlFor="dateReques">Fecha Recepción</label>
+                                                    <br />
+                                                    <label className="text-500">{Moment(dateValueRecep).format('DD-MM-YYYY')}</label>
+                                                </div>
+                                                <div className="col-4">
+                                                    <label htmlFor="obser">Observaciones Envio</label>
+                                                    <br />
+                                                    <label className="text-500">{obsShipp}</label>
+                                                </div>
+                                                <div className="col-4">
+                                                    <label htmlFor="obser">Observaciones Recepción</label>
+                                                    <br />
+                                                    <label className="text-500">{obsRecep}</label>
+                                                </div>
                                             </>}
                                         </div>
                                     </div>
@@ -501,14 +550,14 @@ export const Aprobacion = () => {
                                                 columnsSecuenced.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
                                                         style={{ width: (field === 'idNum') ? '2rem' : (field === 'placeCode') ? '8rem' : (field === 'quality' || field === 'isFasta' || field === 'identity') ? '8rem' : '15rem' }}
-                                                         />
+                                                    />
                                                 })
                                             }
                                             {!isSequence &&
                                                 columns.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
                                                         style={{ width: (field === 'idNum') ? '2rem' : (field === 'placeCode') ? '8rem' : (field === 'quality' || field === 'isFasta' || field === 'identity') ? '8rem' : '15rem' }}
-                                                         />
+                                                    />
                                                 })
                                             }
                                         </DataTable>

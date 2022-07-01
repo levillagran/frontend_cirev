@@ -212,8 +212,8 @@ export const RequerimientosMuestras = () => {
         async function getRequerimientos() {
             const reque = await RequerimientoService.getRequerimientos();
             reque.sort((a, b) => {
-                let x = a.status;
-                let y = b.status;
+                let x = b.number;
+                let y = a.number;
                 return (x < y) ? -1 : (x > y) ? 1 : 0;
             });
             
@@ -782,9 +782,9 @@ export const RequerimientosMuestras = () => {
         return (
             <div className="actions">
                 {rowData.status === "Creado" && <Button icon="pi pi-pencil" className="p-button-rounded p-button-warning mr-1" title="Editar requerimiento" onClick={() => editRequest(rowData)} style={{ height: '2rem', width: '2rem' }}></Button>}
+                <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>
                 {rowData.status === "Creado" && <Button icon="pi pi-upload" className="p-button-rounded p-button-success mr-1" onClick={() => loadDoc(rowData)} title="Subir documento" style={{ height: '2rem', width: '2rem' }}></Button>}
                 <Button icon="pi pi-eye" className="p-button-rounded p-button-info mr-1" onClick={() => viewDoc(rowData)} title="Ver documento" style={{ height: '2rem', width: '2rem' }}></Button>
-                <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>
                 {/* {rowData.status === "Creado" && <Button icon="pi pi-file" className="p-button-rounded p-button-help mr-1" onClick={() => createDoc(rowData)} title="Crear documento" style={{ height: '2rem', width: '2rem' }}></Button>} */}
             </div>
         );
@@ -1138,10 +1138,10 @@ export const RequerimientosMuestras = () => {
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Página {first} / {last} , {totalRecords} Requerimientos"
                             globalFilter={globalFilter} emptyMessage="Requerimientos no encontrados." header={header}>
-                            <Column body={actionBodyTemplate} style={{ width: '11rem' }}></Column>
+                            <Column body={actionBodyTemplate} style={{ width: '7rem' }}></Column>
                             <Column field="status" header="Estado" sortable body={statusBodyTemplate} style={{ width: '7rem' }}></Column>
-                            <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '8rem' }}></Column>
-                            <Column field="entryDate" header="Fecha Ingreso" sortable body={entryDateBodyTemplate} style={{ width: '6rem' }}></Column>
+                            <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '9rem' }}></Column>
+                            <Column field="entryDate" header="Fecha Ingreso" sortable body={entryDateBodyTemplate} style={{ width: '8rem' }}></Column>
                             <Column field="project" header="Proyecto" sortable body={proyectoBodyTemplate} style={{ width: '15rem' }}></Column>
                             <Column field="analysis" header="Análisis" sortable body={analisisBodyTemplate} style={{ width: '7rem' }}></Column>
                             <Column field="typeSample" header="Tipo de Muestra" sortable body={typeSampleBodyTemplate} style={{ width: '7rem' }}></Column>

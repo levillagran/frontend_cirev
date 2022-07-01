@@ -73,8 +73,12 @@ export const Procesamiento = () => {
     let requestEmpty =
     {
         id: null,
-        techniqueId: '',
-        kitReagentId: '',
+        technique01Id: '',
+        kitReagent01Id: '',
+        technique02Id: '',
+        kitReagent02Id: '',
+        technique03Id: '',
+        kitReagent03Id: '',
         processingUsersId: '',
         details: []
     };
@@ -114,23 +118,38 @@ export const Procesamiento = () => {
     const [tipoMuestraSeleccionado, setTipoMuestraSeleccionado] = useState(null);
 
     const [tecnicas, setTecnicas] = useState(null);
-    const [tecnicaFiltrado, setTecnicaFiltrado] = useState([]);
-    const [tecnicaSeleccionado, setTecnicaSeleccionado] = useState(null);
 
-    const [reactivosEnable, setReactivosEnable] = useState(true);
+    const [tecnicaFiltrado, setTecnicaFiltrado] = useState([]);
+    const [tecnica01Seleccionado, setTecnica01Seleccionado] = useState(null);
+    const [tecnica02Seleccionado, setTecnica02Seleccionado] = useState(null);
+    const [tecnica03Seleccionado, setTecnica03Seleccionado] = useState(null);
+
+    const [reactivos01Enable, setReactivos01Enable] = useState(true);
+    const [reactivos02Enable, setReactivos02Enable] = useState(true);
+    const [reactivos03Enable, setReactivos03Enable] = useState(true);
+
     const [reactivos, setReactivos] = useState(null);
     const [reactivoFiltrado, setReactivoFiltrado] = useState([]);
-    const [reactivoSeleccionado, setReactivoSeleccionado] = useState(null);
+    const [reactivo01Seleccionado, setReactivo01Seleccionado] = useState(null);
+    const [reactivo02Seleccionado, setReactivo02Seleccionado] = useState(null);
+    const [reactivo03Seleccionado, setReactivo03Seleccionado] = useState(null);
 
     const [request, setRequest] = useState(requestEmpty);
     const [requestDetail, setRequestDetail] = useState(requestDetailEmpty);
 
     const [chgStatus, setChgStatus] = useState(emptyChangeStatus);
 
+    const [tec, setTec] = useState('1');
+
 
     useEffect(() => {
         async function getRequerimientos() {
             const reque = await ProcesamientoService.getProcesamientos();
+            reque.sort((a, b) => {
+                let y = a.id;
+                let x = b.id;
+                return (x < y) ? -1 : (x > y) ? 1 : 0;
+            });
             setRequerimientos(reque);
         }
         getRequerimientos();
@@ -152,17 +171,73 @@ export const Procesamiento = () => {
         </div>
     );
 
+    const tecnicasKits = () => {
+        return (
+            <div>
+                {tec === '1' && <div className="formgroup-inline justify-content-center">
+                    <div className="col-3 formgroup-inline justify-content-between align-items-center">
+                        <label htmlFor="tecnica01">Técnica</label>
+                        <AutoComplete placeholder="Buscar" id="tecnica01" dropdown value={tecnica01Seleccionado} onChange={(e) => { setTecnica01SeleccionadoMetodo(e); }} suggestions={tecnicaFiltrado} completeMethod={searchTecnica} field="name" />
+                        {submitted && !tecnica01Seleccionado && <small style={{ color: 'red' }}>Tecnica es requerido.</small>}
+                    </div>
+                    <div className="col-1"></div>
+                    <div className="col-3 formgroup-inline justify-content-between align-items-center">
+                        <label htmlFor="kit01">Kit/Reactivos</label>
+                        <AutoComplete placeholder="Buscar" id="kit01" dropdown value={reactivo01Seleccionado}
+                            disabled={reactivos01Enable} onChange={(e) => { setReactivo01SeleccionadoMetodo(e); }} suggestions={reactivoFiltrado} completeMethod={searchReactivo} field="name" />
+                        {submitted && !reactivo01Seleccionado && <small style={{ color: 'red' }}>Reactivo es requerido.</small>}
+                    </div></div>}
+                {tec === '2' && <div className="formgroup-inline justify-content-center">
+                    <div className="col-3 formgroup-inline justify-content-between align-items-center">
+                        <label htmlFor="tecnica02">Técnica</label>
+                        <AutoComplete placeholder="Buscar" id="tecnica02" dropdown value={tecnica02Seleccionado} onChange={(e) => { setTecnica02SeleccionadoMetodo(e); }} suggestions={tecnicaFiltrado} completeMethod={searchTecnica} field="name" />
+                        
+                    </div>
+                    <div className="col-1"></div>
+                    <div className="col-3 formgroup-inline justify-content-between align-items-center">
+                        <label htmlFor="kit02">Kit/Reactivos</label>
+                        <AutoComplete placeholder="Buscar" id="kit02" dropdown value={reactivo02Seleccionado}
+                            disabled={reactivos02Enable} onChange={(e) => { setReactivo02SeleccionadoMetodo(e); }} suggestions={reactivoFiltrado} completeMethod={searchReactivo} field="name" />
+                        
+                    </div></div>}
+                {tec === '3' && <div className="formgroup-inline justify-content-center">
+                    <div className="col-3 formgroup-inline justify-content-between align-items-center">
+                        <label htmlFor="tecnica03">Técnica</label>
+                        <AutoComplete placeholder="Buscar" id="tecnica03" dropdown value={tecnica03Seleccionado} onChange={(e) => { setTecnica03SeleccionadoMetodo(e); }} suggestions={tecnicaFiltrado} completeMethod={searchTecnica} field="name" />
+                        
+                    </div>
+                    <div className="col-1"></div>
+                    <div className="col-3 formgroup-inline justify-content-between align-items-center">
+                        <label htmlFor="kit03">Kit/Reactivos</label>
+                        <AutoComplete placeholder="Buscar" id="kit03" dropdown value={reactivo03Seleccionado}
+                            disabled={reactivos03Enable} onChange={(e) => { setReactivo03SeleccionadoMetodo(e); }} suggestions={reactivoFiltrado} completeMethod={searchReactivo} field="name" />
+                        
+                    </div></div>}
+            </div>
+        )
+    }
+
     const saveSolicitud = () => {
         setSubmitted(true);
         async function saveRequest(request) {
+            console.log(request)
             const reque = await ProcesamientoService.saveProcesamiento(request);
+            reque.sort((a, b) => {
+                let x = a.id;
+                let y = b.id;
+                return (x < y) ? -1 : (x > y) ? 1 : 0;
+            });
             setRequerimientos(reque);
         }
-        if (tecnicaSeleccionado && submitted && reactivoSeleccionado) {
+        if (tecnica01Seleccionado && submitted && reactivo01Seleccionado) {
             setRequest(requestEmpty);
             request.id = requerimientoId;
-            request.techniqueId = tecnicaSeleccionado.code;
-            request.kitReagentId = reactivoSeleccionado.code;
+            request.technique01Id = tecnica01Seleccionado.code;
+            request.kitReagent01Id = reactivo01Seleccionado.code;
+            if(tecnica02Seleccionado.code) request.technique02Id = tecnica02Seleccionado.code;
+            if(reactivo02Seleccionado.code) request.kitReagent02Id = reactivo02Seleccionado.code;
+            if(tecnica03Seleccionado.code) request.technique03Id = tecnica03Seleccionado.code;
+            if(reactivo03Seleccionado.code) request.kitReagent03Id = reactivo03Seleccionado.code;
             const user = JSON.parse(localStorage.getItem('user'));
             if (processingUsersId === "" || processingUsersId === null) {
                 request.processingUsersId = user.id;
@@ -201,7 +276,7 @@ export const Procesamiento = () => {
             const reque = await EstadoService.changeStatus(chgSt);
             //setRequerimientos(reque);
         }
-        if (tecnicaSeleccionado && submitted && reactivoSeleccionado) {
+        if (tecnica01Seleccionado && submitted && reactivo01Seleccionado) {
             saveSolicitud();
             chgStatus.requerimientoId = requerimientoId;
             chgStatus.estadoId = 3;
@@ -240,9 +315,9 @@ export const Procesamiento = () => {
         }, 250);
     };
 
-    const setTecnicaSeleccionadoMetodo = (tecnica) => {
-        setTecnicaSeleccionado(tecnica.value)
-        setReactivoSeleccionado('');
+    const setTecnica01SeleccionadoMetodo = (tecnica) => {
+        setTecnica01Seleccionado(tecnica.value)
+        setReactivo01Seleccionado('');
         async function getReactivos() {
             const reactivos = await CatalogoService.getReactivos(tecnica.value.code);
             const reac = [];
@@ -250,13 +325,51 @@ export const Procesamiento = () => {
                 reac.push({ "name": e.name, "code": e.id });
             });
             setReactivos(reac);
-            setReactivosEnable(false);
+            setReactivos01Enable(false);
         }
         getReactivos();
     }
 
-    const setReactivoSeleccionadoMetodo = (reactivo) => {
-        setReactivoSeleccionado(reactivo.value)
+    const setReactivo01SeleccionadoMetodo = (reactivo) => {
+        setReactivo01Seleccionado(reactivo.value)
+    }
+
+    const setTecnica02SeleccionadoMetodo = (tecnica) => {
+        setTecnica02Seleccionado(tecnica.value)
+        setReactivo02Seleccionado('');
+        async function getReactivos() {
+            const reactivos = await CatalogoService.getReactivos(tecnica.value.code);
+            const reac = [];
+            reactivos.map((e) => {
+                reac.push({ "name": e.name, "code": e.id });
+            });
+            setReactivos(reac);
+            setReactivos02Enable(false);
+        }
+        getReactivos();
+    }
+
+    const setReactivo02SeleccionadoMetodo = (reactivo) => {
+        setReactivo02Seleccionado(reactivo.value)
+    }
+
+    const setTecnica03SeleccionadoMetodo = (tecnica) => {
+        setTecnica03Seleccionado(tecnica.value)
+        setReactivo03Seleccionado('');
+        async function getReactivos() {
+            const reactivos = await CatalogoService.getReactivos(tecnica.value.code);
+            const reac = [];
+            reactivos.map((e) => {
+                reac.push({ "name": e.name, "code": e.id });
+            });
+            setReactivos(reac);
+            setReactivos03Enable(false);
+        }
+        getReactivos();
+    }
+
+    const setReactivo03SeleccionadoMetodo = (reactivo) => {
+        setReactivo03Seleccionado(reactivo.value)
     }
 
     const createDoc = (rowData) => {
@@ -281,9 +394,16 @@ export const Procesamiento = () => {
             setProcessingUsersId(req.processingUsersId);
             setAnalisisSeleccionado({ "name": req.analysis, "code": req.analysisId });
             setEspecificacionesSeleccionado({ "name": req.specification, "code": req.specificationId });
-            req.techniqueId ? setTecnicaSeleccionado({ "name": req.technique, "code": req.techniqueId }) : setTecnicaSeleccionado("");
-            req.kitReagentId ? setReactivoSeleccionado({ "name": req.kitReagent, "code": req.kitReagentId }) : setReactivoSeleccionado("");
-            req.techniqueId ? setReactivosEnable(false) : setReactivosEnable(true);
+            console.log(req)
+            req.technique01Id ? setTecnica01Seleccionado({ "name": req.technique01, "code": req.technique01Id }) : setTecnica01Seleccionado("");
+            req.technique02Id ? setTecnica02Seleccionado({ "name": req.technique02, "code": req.technique02Id }) : setTecnica02Seleccionado("");
+            req.technique03Id ? setTecnica03Seleccionado({ "name": req.technique03, "code": req.technique03Id }) : setTecnica03Seleccionado("");
+            req.kitReagent01Id ? setReactivo01Seleccionado({ "name": req.kitReagent01, "code": req.kitReagent01Id }) : setReactivo01Seleccionado("");
+            req.kitReagent02Id ? setReactivo02Seleccionado({ "name": req.kitReagent02, "code": req.kitReagent02Id }) : setReactivo02Seleccionado("");
+            req.kitReagent03Id ? setReactivo03Seleccionado({ "name": req.kitReagent03, "code": req.kitReagent03Id }) : setReactivo03Seleccionado("");
+            req.technique01Id ? setReactivos01Enable(false) : setReactivos01Enable(true);
+            req.technique02Id ? setReactivos02Enable(false) : setReactivos02Enable(true);
+            req.technique03Id ? setReactivos03Enable(false) : setReactivos03Enable(true);
             async function getTecnicas() {
                 const tecs = await CatalogoService.getTecnicas(req.specificationId);
                 const tec = [];
@@ -301,7 +421,7 @@ export const Procesamiento = () => {
                         reac.push({ "name": e.name, "code": e.id });
                     });
                     setReactivos(reac);
-                    setReactivosEnable(false);
+                    setReactivos01Enable(false);
                 }
                 getReactivos();
             }
@@ -309,6 +429,11 @@ export const Procesamiento = () => {
             setDateValueRequest(new Date(req.entryDate))
             setDateValueSample(new Date());
             setProducts2([]);
+            req.details.sort((a, b) => {
+                let x = a.id;
+                let y = b.id;
+                return (x < y) ? -1 : (x > y) ? 1 : 0;
+            });
             req.details.map((e, index) => {
                 products2.push({ "idNum": index + 1, ...e });
             });
@@ -420,18 +545,28 @@ export const Procesamiento = () => {
         return <InputText type="text" onChange={(e) => onInputTextChange(options, e)} />;
     }
 
-    const columns = [
+    const columns01 = [
         { field: 'idNum', header: 'Nº' },
         { field: 'placeCode', header: 'Id Muestra' },
-        { field: 'dateResults01', header: 'Fecha 01' },
-        { field: 'processingResults01', header: 'Resultado 01' },
-        { field: 'observationResults01', header: 'Observaciones 01' },
-        { field: 'dateResults02', header: 'Fecha 02' },
-        { field: 'processingResults02', header: 'Resultado 02' },
-        { field: 'observationResults02', header: 'Observaciones 02' },
-        { field: 'dateResults03', header: 'Fecha 03' },
-        { field: 'processingResults03', header: 'Resultado 03' },
-        { field: 'observationResults03', header: 'Observaciones 03' }
+        { field: 'dateResults01', header: 'Fecha' },
+        { field: 'processingResults01', header: 'Resultado' },
+        { field: 'observationResults01', header: 'Observaciones' },
+    ];
+
+    const columns02 = [
+        { field: 'idNum', header: 'Nº' },
+        { field: 'placeCode', header: 'Id Muestra' },
+        { field: 'dateResults02', header: 'Fecha' },
+        { field: 'processingResults02', header: 'Resultado' },
+        { field: 'observationResults02', header: 'Observaciones' },
+    ];
+
+    const columns03 = [
+        { field: 'idNum', header: 'Nº' },
+        { field: 'placeCode', header: 'Id Muestra' },
+        { field: 'dateResults03', header: 'Fecha' },
+        { field: 'processingResults03', header: 'Resultado' },
+        { field: 'observationResults03', header: 'Observaciones' }
     ];
 
     const cellEditor = (options) => {
@@ -492,7 +627,7 @@ export const Procesamiento = () => {
                             <div>
                                 <div className="flex">
                                     <div className="col-2 grid justify-content-center">
-                                        <img src='/assets/demo/images/galeriaSistema/proceso.jpg' width="160rem" height="230rem" />
+                                        <img src='/assets/demo/images/galeriaSistema/proceso.jpg' width="110rem" height="180rem" />
                                     </div>
                                     <div className="col-10">
                                         <h3 className="m-0">Registro del procesamiento de muestras</h3>
@@ -502,7 +637,7 @@ export const Procesamiento = () => {
                                                 <br />
                                                 <label className="text-500">{Moment(dateValueRequest).format('DD-MM-YYYY')}</label>
                                             </div>
-                                            <div className="col-3">
+                                            <div className="col-4">
                                                 <label >Proyecto de investigación</label>
                                                 <br />
                                                 {proyectoSeleccionado && <label className="text-500">{proyectoSeleccionado.name}</label>}
@@ -512,7 +647,7 @@ export const Procesamiento = () => {
                                                 <br />
                                                 {analisisSeleccionado && <label className="text-500">{analisisSeleccionado.name}</label>}
                                             </div>
-                                            <div className="col-3">
+                                            <div className="col-2">
                                                 <label htmlFor="name">Especificación del analisis</label>
                                                 <br />
                                                 {especificacionSeleccionado && <label className="text-500">{especificacionSeleccionado.name}</label>}
@@ -523,32 +658,47 @@ export const Procesamiento = () => {
                                                 {tipoMuestraSeleccionado && <label className="text-500">{tipoMuestraSeleccionado.name}</label>}
                                             </div>
                                         </div>
-                                        <div className="formgroup-inline">
-                                            <div className="col-3">
-                                                <label htmlFor="tecnicas">Técnica</label>
-                                                <AutoComplete placeholder="Buscar" id="tecnicas" dropdown value={tecnicaSeleccionado} onChange={(e) => { setTecnicaSeleccionadoMetodo(e); }} suggestions={tecnicaFiltrado} completeMethod={searchTecnica} field="name" />
-                                                {submitted && !tecnicaSeleccionado && <small style={{ color: 'red' }}>Tecnica es requerido.</small>}
-                                            </div>
-                                            <div className="col-3">
-                                                <label htmlFor="name">Kit/Reactivos</label>
-                                                <AutoComplete placeholder="Buscar" id="dd" dropdown value={reactivoSeleccionado}
-                                                    disabled={reactivosEnable} onChange={(e) => { setReactivoSeleccionadoMetodo(e); }} suggestions={reactivoFiltrado} completeMethod={searchReactivo} field="name" />
-                                                {submitted && !reactivoSeleccionado && <small style={{ color: 'red' }}>Reactivo es requerido.</small>}
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                                 <div className="mx-5">
                                     <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-                                        <h5>Muestras</h5>
+                                        <h5 className="mt-2">Muestras</h5>
+                                        <div className="formgroup-inline justify-content-end">
+                                            <div className="field-radiobutton">
+                                                <RadioButton inputId="tec01" name="tec" value="1" onChange={(e) => setTec(e.value)} checked={tec === '1'} />
+                                                <label htmlFor="tec01">Procesamiento 01</label>
+                                            </div>
+                                            <div className="field-radiobutton">
+                                                <RadioButton inputId="tec02" name="tec" value="2" onChange={(e) => setTec(e.value)} checked={tec === '2'} />
+                                                <label htmlFor="tec02">Procesamiento 02</label>
+                                            </div>
+                                            <div className="field-radiobutton">
+                                                <RadioButton inputId="tec03" name="tec" value="3" onChange={(e) => setTec(e.value)} checked={tec === '3'} />
+                                                <label htmlFor="tec03">Procesamiento 03</label>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="p-fluid mt-2">
                                         <DataTable value={products3} editMode="cell" className="editable-cells-table" rowHover scrollable inline style={{ fontSize: '14px', textAlign: 'center' }}
-                                            emptyMessage="Ninguna muestra agragada.">
-                                            {
-                                                columns.map(({ field, header }) => {
+                                            emptyMessage="Ninguna muestra agragada." header={tecnicasKits()}>
+                                            {tec === '1' &&
+                                                columns01.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
-                                                        style={{ width: (field === 'idNum') ? '2rem' : '8rem' }}
+                                                        style={{ width: (field === 'idNum' || field === 'placeCode') ? '2rem' : (field === 'dateResults01') ? '3rem' : '8rem' }}
+                                                        editor={(options) => cellEditor(options)} />
+                                                })
+                                            }
+                                            {tec === '2' &&
+                                                columns02.map(({ field, header }) => {
+                                                    return <Column key={field} field={field} header={header}
+                                                        style={{ width: (field === 'idNum' || field === 'placeCode') ? '2rem' : (field === 'dateResults02') ? '3rem' : '8rem' }}
+                                                        editor={(options) => cellEditor(options)} />
+                                                })
+                                            }
+                                            {tec === '3' &&
+                                                columns03.map(({ field, header }) => {
+                                                    return <Column key={field} field={field} header={header}
+                                                        style={{ width: (field === 'idNum' || field === 'placeCode') ? '2rem' : (field === 'dateResults03') ? '3rem' : '8rem' }}
                                                         editor={(options) => cellEditor(options)} />
                                                 })
                                             }
