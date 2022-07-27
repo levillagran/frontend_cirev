@@ -451,7 +451,7 @@ export const ReporteResultados = () => {
                                                 <InputTextarea id="obser" value={obsResults} onChange={(e) => onObsResultsChange(e)} rows={1} cols={20} autoResize />
                                             </div>
                                         </div>
-                                    </div>
+ fgi3                                   </div>
                                 </div>
                                 <div className="mx-5">
                                     <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">

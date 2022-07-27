@@ -30,7 +30,7 @@ export const Procesamiento = () => {
     let emptySample =
     {
         id: '',
-        placeCode: '',
+        code: '',
         collectionDate: '',
         taxonomic: '',
         taxonomicId: '',
@@ -547,7 +547,7 @@ export const Procesamiento = () => {
 
     const columns01 = [
         { field: 'idNum', header: 'Nº' },
-        { field: 'placeCode', header: 'Id Muestra' },
+        { field: 'code', header: 'Id Muestra' },
         { field: 'dateResults01', header: 'Fecha' },
         { field: 'processingResults01', header: 'Resultado' },
         { field: 'observationResults01', header: 'Observaciones' },
@@ -555,7 +555,7 @@ export const Procesamiento = () => {
 
     const columns02 = [
         { field: 'idNum', header: 'Nº' },
-        { field: 'placeCode', header: 'Id Muestra' },
+        { field: 'code', header: 'Id Muestra' },
         { field: 'dateResults02', header: 'Fecha' },
         { field: 'processingResults02', header: 'Resultado' },
         { field: 'observationResults02', header: 'Observaciones' },
@@ -563,7 +563,7 @@ export const Procesamiento = () => {
 
     const columns03 = [
         { field: 'idNum', header: 'Nº' },
-        { field: 'placeCode', header: 'Id Muestra' },
+        { field: 'code', header: 'Id Muestra' },
         { field: 'dateResults03', header: 'Fecha' },
         { field: 'processingResults03', header: 'Resultado' },
         { field: 'observationResults03', header: 'Observaciones' }
@@ -684,21 +684,21 @@ export const Procesamiento = () => {
                                             {tec === '1' &&
                                                 columns01.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
-                                                        style={{ width: (field === 'idNum' || field === 'placeCode') ? '2rem' : (field === 'dateResults01') ? '3rem' : '8rem' }}
+                                                        style={{ width: field === 'idNum' ? '1rem' : (field === 'dateResults01'|| field === 'code') ? '3rem' : '8rem' }}
                                                         editor={(options) => cellEditor(options)} />
                                                 })
                                             }
                                             {tec === '2' &&
                                                 columns02.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
-                                                        style={{ width: (field === 'idNum' || field === 'placeCode') ? '2rem' : (field === 'dateResults02') ? '3rem' : '8rem' }}
+                                                        style={{ width: field === 'idNum' ? '1rem' : (field === 'dateResults02' || field === 'code') ? '3rem' : '8rem' }}
                                                         editor={(options) => cellEditor(options)} />
                                                 })
                                             }
                                             {tec === '3' &&
                                                 columns03.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
-                                                        style={{ width: (field === 'idNum' || field === 'placeCode') ? '2rem' : (field === 'dateResults03') ? '3rem' : '8rem' }}
+                                                        style={{ width: field === 'idNum' ? '1rem' : (field === 'dateResults03' || field === 'code') ? '3rem' : '8rem' }}
                                                         editor={(options) => cellEditor(options)} />
                                                 })
                                             }
