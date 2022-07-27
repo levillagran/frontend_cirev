@@ -15,6 +15,7 @@ class EstadoService {
     .post(baseURL() + "estados/changeStatusValidator", data, { headers: authHeader() });
     return res.data;
   }
+   77
   
 }
 
