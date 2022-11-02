@@ -11,6 +11,8 @@ export const AppTopbar = (props) => {
     const menu = useRef(null);
     const toast = useRef(null);
 
+    const user = JSON.parse(localStorage.getItem('user'));
+
     const overlayMenuItems = [
         {
             label: 'Cerrar sesión',
@@ -46,7 +48,12 @@ export const AppTopbar = (props) => {
             <Toast ref={toast} />
             <Link to="/app" className="layout-topbar-logo">
                 <img src={'assets/layout/images/lgc_topBar.jpg'} alt="logo" />
-                <span>CIREV | MOLECULAR</span>
+                <span>CIREV |
+                    {user.codeModulo === 'INS' && <span> INSECTARIO</span>}
+                    {user.codeModulo === 'COL' && <span> COLECCIÓN</span>}
+                    {user.codeModulo === 'MOL' && <span> MOLECULAR</span>}
+                    {user.codeModulo === 'EQU' && <span> EQUIPOS</span>}
+                </span>
             </Link>
             <button type="button" className="p-link  layout-menu-button layout-topbar-button" onClick={props.onToggleMenuClick}>
                 <i className="pi pi-bars" />

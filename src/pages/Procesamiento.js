@@ -582,7 +582,7 @@ export const Procesamiento = () => {
     const requerimientoDialogFooter = (
         <>
             <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={saveSolicitud} />
-            <Button label="Guardar y eviar para aprovación" icon="pi pi-check" className="p-button-text" onClick={saveSendSolicitud} />
+            <Button label="Guardar y eviar para validación" icon="pi pi-check" className="p-button-text" onClick={saveSendSolicitud} />
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
         </>
     );

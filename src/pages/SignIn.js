@@ -61,27 +61,15 @@ class SignIn extends Component {
     if (localStorage.getItem('user')) {
       window.location.href = "/app";
     }
-    this.setScreemW = (window.screen.width - 615);
+    this.setScreemW = (window.screen.width);
   }
 
   constructor(props) {
     super(props);
 
-
     this.galleriaService = new PhotoService();
     this.itemTemplate = this.itemTemplate.bind(this);
 
-    this.responsiveOptions = [
-      {
-        breakpoint: `${this.setScreemW}px`
-      },
-      {
-        breakpoint: `${this.setScreemW / 2}px`
-      },
-      {
-        breakpoint: `${this.setScreemW / 3}px`
-      }
-    ];
   }
 
   itemTemplate(item) {
@@ -98,8 +86,8 @@ class SignIn extends Component {
         <Toast ref={(el) => this.toast = el} />
         <div className="grid">
           <div className="xs:col-1 sm:col-2 md:col-5 lg:col-7 xl:col-9">
-            <Galleria value={this.state.images} responsiveOptions={this.responsiveOptions} style={{ maxWidth: `${this.setScreemW}px` }}
-              item={this.itemTemplate} circular autoPlay transitionInterval={2000} />
+            <Galleria value={this.state.images} style={{ maxWidth: `${this.setScreemW}px` }}
+              item={this.itemTemplate} circular autoPlay transitionInterval={3000} />
           </div>
           <Card className="xs:col-11 sm:col-10 md:col-7 lg:col-5 xl:col-3">
             <div className="text-center m-3 " style={{ height: '8rem' }}></div>

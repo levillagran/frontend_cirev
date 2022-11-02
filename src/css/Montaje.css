@@ -1,0 +1,19 @@
+.fondo-tipo {
+    background-color: rgba(69, 102, 252, 0.37) !important;
+}
+
+.fondo-persona{
+    background-color: rgba(192, 212, 253, 0.37) !important;
+}
+
+.fondo-inmaduros {
+    background-color: rgba(120, 188, 52, 0.37) !important;
+}
+
+.fondo-adultos{
+    background-color: rgba(160, 252, 69, 0.37) !important;
+}
+
+.fondo-info{
+    background-color: rgba(122, 173, 255, 0.37) !important;
+}

@@ -6,11 +6,8 @@ import { AppTopbar } from './AppTopbar';
 import { AppFooter } from './AppFooter';
 import { AppMenu } from './AppMenu';
 
-import { Dashboard } from './pages/Dashboard';
 import { DashboardMolecular } from './pages/DashboardMolecular';
-import { ProfesionalesCrud } from './pages/ProfesionalesCrud';
-import { IndicadoresCrud } from './pages/IndicadoresCrud';
-import { SemaforizacionCrud } from './pages/SemaforizacionCrud';
+import { DashboardColeccion } from './pages/coleccion/DashboardColeccion';
 
 import PrimeReact from 'primereact/api';
 
@@ -24,6 +21,9 @@ import './App.scss';
 
 import MenuService from './service/MenuService';
 import { RequerimientosMuestras } from './pages/RequerimientosMuestras';
+import { RequerimientosColeccion } from './pages/coleccion/RequerimientosColeccion';
+import { CuracionColeccion } from './pages/coleccion/CuracionColeccion';
+import { ReporteResultadosColeccion } from './pages/coleccion/ReporteResultadosColeccion';
 import { Procesamiento } from './pages/Procesamiento';
 import { Secuenciacion } from './pages/Secuenciacion';
 import { Aprobacion } from './pages/Aprobacion';
@@ -123,9 +123,9 @@ const App = () => {
                     usuario.usuario = user.user;
                 }
                 setRol(user.roles[0]);
-
                 async function getMenu() {
                     const response = await MenuService.getMenu(user.roles[0], user.codeModulo);
+                    //console.log(response)
                     response.map((e) => {
                         if (!e.parentId) {
                             menuSeccion.push(e)
@@ -206,13 +206,16 @@ const App = () => {
 
             <div className="layout-main-container">
                 <div className="layout-main">
-                    <Route path="/app" exact component={rol === 'GESTOR' ? Dashboard : DashboardMolecular} />
+                    <Route path="/app" exact component={rol === 'admin_mol' ? DashboardMolecular : rol === 'admin_col' ? DashboardColeccion : null} />
                     <Route path="/app/requerimientosMuestras" component={RequerimientosMuestras} exact />
                     <Route path="/app/procesamiento" component={Procesamiento} exact />
                     <Route path="/app/secuenciacion" component={Secuenciacion} exact />
                     <Route path="/app/aprobacion" component={Aprobacion} exact />
                     <Route path="/app/reporteProcesamiento" component={ReporteProcesamiento} exact />
                     <Route path="/app/reporteResultados" component={ReporteResultados} exact />
+                    <Route path="/app/requerimientosColeccion" component={RequerimientosColeccion} exact />
+                    <Route path="/app/curacionColeccion" component={CuracionColeccion} exact />
+                    <Route path="/app/reporteResultadosColeccion" component={ReporteResultadosColeccion} exact />
                 </div>
                 <AppFooter layoutColorMode={layoutColorMode} />
             </div>

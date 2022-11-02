@@ -81,7 +81,7 @@ class CatalogoService {
     .get(baseURL() + "catalogos/kits/" + technicaId, { headers: authHeader() });
     return res.data;
   }
-
+ 
 }
 
 export default new CatalogoService();  
