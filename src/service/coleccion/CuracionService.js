@@ -46,6 +46,31 @@ class CuracionService {
     return res.data;
   } 
 
+  async getMontados(id) { 
+    const res = await axios
+    .get(baseURL() + "curaciones/mountedById/" + id, { headers: authHeader() });
+    return res.data;
+  } 
+
+  async postSaveIdentificador(data) {
+    const res = await axios
+    .post(baseURL() + "curaciones/saveIdentificador", data, { headers: authHeader() });
+    return res.data;
+  }
+
+  async postSaveDigitador(data) {
+    const res = await axios
+    .post(baseURL() + "curaciones/saveDigitador", data, { headers: authHeader() });
+    return res.data;
+  }
+
+  async getFinalizar(id) { 
+    const res = await axios
+    .get(baseURL() + "curaciones/isEnd/" + id, { headers: authHeader() });
+    return res.data;
+  } 
+ 
+
 }
 
 export default new CuracionService();

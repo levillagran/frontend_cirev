@@ -991,22 +991,6 @@ export const RequerimientosColeccion = () => {
         )
     }
 
-    const sequenceBodyTemplate = (rowData) => {
-        return (
-            <>
-                {rowData.isSequenced ? 'Sí' : 'No'}
-            </>
-        )
-    }
-
-    const typeSampleBodyTemplate = (rowData) => {
-        return (
-            <>
-                {rowData.typeSample}
-            </>
-        )
-    }
-
     const numSmplesBodyTemplate = (rowData) => {
         return (
             <>

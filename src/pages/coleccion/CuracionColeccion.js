@@ -212,6 +212,15 @@ export const CuracionColeccion = () => {
         obsStored: null,
     };
 
+    let emptyColector =
+    {
+        id: null,
+        projectId: null,
+        name: null,
+        lastname: null,
+        active: null,
+    };
+
     const toast = useRef(null);
     const dt = useRef(null);
     const [globalFilter, setGlobalFilter] = useState(null);
@@ -250,6 +259,10 @@ export const CuracionColeccion = () => {
     const [almacenarDialog, setAlmacenarDialog] = useState(false);
     const [montajeDialog, setMontajeDialog] = useState(false);
     const [pdfDialog, setPdfDialog] = useState(false);
+    const [newIdentificadorDialog, setNewIdentificadorDialog] = useState(false);
+    const [newDigitadorDialog, setNewDigitadorDialog] = useState(false);
+
+    const [colectores, setColectores] = useState(null);
 
     const [requerimientos, setRequerimientos] = useState(null);
     const [requerimientoId, setRequerimientoId] = useState(null);
@@ -359,9 +372,13 @@ export const CuracionColeccion = () => {
     const [requestDetail, setRequestDetail] = useState(requestDetailEmpty);
 
     const [chgStatus, setChgStatus] = useState(emptyChangeStatus);
+    const [fin, setFin] = useState(false);
 
     const [tec, setTec] = useState('1');
 
+    const [newColector, setNewColector] = useState(emptyColector);
+    const [nameColector, setNameColector] = useState(null);
+    const [lastnameColector, setLastnameColector] = useState(null);
 
     useEffect(() => {
         async function getRequerimientos() {
@@ -388,6 +405,11 @@ export const CuracionColeccion = () => {
         setSubmitted(false);
         setAlmacenarDialog(false);
         setMontajeDialog(false);
+        async function getfin() {
+            const fin = await CuracionService.getFinalizar(requerimientoId);
+            fin === "true" ? setFin(true) : setFin(false);
+        }
+        getfin();
         setProcesamientoDialog(true);
     }
 
@@ -469,11 +491,15 @@ export const CuracionColeccion = () => {
             setProducts3(products2);
             setSubmitted(false);
         }
+        async function getfin() {
+            const fin = await CuracionService.getFinalizar(requerimientoId);
+            fin === "true" ? setFin(true) : setFin(false);
+        }
         if (almacenadosT.length > 0) {
             almacenadosT.map(e => {
                 let alma =
                 {
-                    id: null,
+                    id: e.id,
                     reqDetailId: muestraSeleccionadoId,
                     kindId: e.especieId,
                     identificadorId: e.identificadorId,
@@ -493,6 +519,7 @@ export const CuracionColeccion = () => {
             saveRequest(almacenarArr);
             setAlmacenarArr([]);
             setAlmacenarDialog(false);
+            getfin();
             setProcesamientoDialog(true);
             toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Almacenamiento exitoso', life: 5000 });
         } else {
@@ -516,10 +543,15 @@ export const CuracionColeccion = () => {
             setProducts3(products2);
             setSubmitted(false);
         }
+        async function getfin() {
+            const fin = await CuracionService.getFinalizar(requerimientoId);
+            fin === "true" ? setFin(true) : setFin(false);
+        }
         if (montados.length > 0) {
             montados.map(e => {
                 setRegMontar(emptyRegMontar);
                 //regAlmacenar.id = muestraSeleccionadoId;
+                regMontar.id = e.id;
                 regMontar.reqDetailId = muestraSeleccionadoId;
                 regMontar.identificadorId = e.identificadorId;
                 regMontar.digitadorId = e.digitadorId;
@@ -543,6 +575,7 @@ export const CuracionColeccion = () => {
             saveRequest(montarArr);
             setMontarArr([]);
             setMontajeDialog(false);
+            getfin();
             setProcesamientoDialog(true);
             toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Montaje exitoso', life: 5000 });
             //setUsuario(emptyUsuraio);
@@ -557,16 +590,14 @@ export const CuracionColeccion = () => {
             const reque = await EstadoService.changeStatus(chgSt);
             //setRequerimientos(reque);
         }
-        if (tecnica01Seleccionado && submitted && reactivo01Seleccionado) {
-            saveSolicitud();
+        if (submitted) {
             chgStatus.requerimientoId = requerimientoId;
             chgStatus.estadoId = 3;
             changeStatus(chgStatus);
-            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Muestras enviadas para aprovación', life: 5000 });
+            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Curación finalizada correctamente', life: 5000 });
             setProcesamientoDialog(false);
-            //setUsuario(emptyUsuraio);
         } else {
-            toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Ingrese toda la información', life: 5000 });
+            toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'No se ha finalizado la curación', life: 5000 });
         }
     }
 
@@ -594,6 +625,9 @@ export const CuracionColeccion = () => {
             });
             setProducts3(products2);
             setSubmitted(false);
+            const fin = await CuracionService.getFinalizar(request.id);
+            fin === "true" ? setFin(true) : setFin(false);
+            console.log(fin)
             setProcesamientoDialog(true);
         }
         getRequerimiento();
@@ -603,7 +637,9 @@ export const CuracionColeccion = () => {
         setProcesamientoDialog(false);
         async function getAlmacenados() {
             const alma = await CuracionService.getAlmacenados(muestra.id);
-            console.log(alma);
+            alma.map((e, index) => {
+                e.idNum = index + 1;
+            });
             setAlmacenadosT(alma);
             setMuestraSeleccionado(muestra.code);
             setMuestraSeleccionadoId(muestra.id);
@@ -616,13 +652,19 @@ export const CuracionColeccion = () => {
 
     const montar = (muestra) => {
         setProcesamientoDialog(false);
-        //console.log(muestra);
-        setMuestraSeleccionado(muestra.code);
-        setMuestraSeleccionadoId(muestra.id);
-        loadCatalog();
-        setSubmitted(false);
-        setMontajeDialog(true);
-
+        async function getMontados() {
+            const mount = await CuracionService.getMontados(muestra.id);
+            mount.map((e, index) => {
+                e.idNum = index + 1;
+            });
+            setMontados(mount);
+            setMuestraSeleccionado(muestra.code);
+            setMuestraSeleccionadoId(muestra.id);
+            loadCatalog();
+            setSubmitted(false);
+            setMontajeDialog(true);
+        }
+        getMontados();
     }
 
     const loadCatalog = () => {
@@ -780,6 +822,40 @@ export const CuracionColeccion = () => {
             </div>)
     }
 
+    const saveNewColector = (tipo) => {
+        async function saveIden(colector) {
+            const colec = await CuracionService.postSaveIdentificador(colector);
+            const colecs = [];
+            colec.map((e) => {
+                colecs.push({ "name": e.name + " " + e.lastname, "code": e.id });
+            });
+            setIdentificadores(colecs);
+        }
+        async function saveDigi(colector) {
+            const colec = await CuracionService.postSaveDigitador(colector);
+            const colecs = [];
+            colec.map((e) => {
+                colecs.push({ "name": e.name + " " + e.lastname, "code": e.id });
+            });
+            setDigitadores(colecs);
+        }
+        if (nameColector && lastnameColector) {
+            newColector.name = nameColector;
+            newColector.lastname = lastnameColector;
+            newColector.projectId = proyectoSeleccionado.code;
+            newColector.active = true;
+            tipo === 1 ? saveIden(newColector) : saveDigi(newColector);
+            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Colector registrado', life: 5000 });
+            setNewIdentificadorDialog(false);
+            setNewDigitadorDialog(false);
+            setNewColector(emptyColector);
+            setNameColector(null);
+            setLastnameColector(null);
+        } else {
+            toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Colector no registrado', life: 5000 });
+        }
+    }
+
     ////////////////////
     const [products2, setProducts2] = useState([]);
     const [products3, setProducts3] = useState([]);
@@ -887,7 +963,9 @@ export const CuracionColeccion = () => {
         regAlmacenado.especieId = especieSeleccionado.code;
         regAlmacenado.identificador = identificadorSeleccionado.name;
         regAlmacenado.identificadorId = identificadorSeleccionado.code;
-        regAlmacenado.fechaActual = dateActualRequest.getFullYear() + '-' + (dateActualRequest.getMonth() + 1) + '-' + dateActualRequest.getDate();
+        dateActualRequest.getDate() < 10 ?
+            regAlmacenado.fechaActual = dateActualRequest.getFullYear() + '-' + (dateActualRequest.getMonth() + 1) + '-0' + dateActualRequest.getDate() :
+            regAlmacenado.fechaActual = dateActualRequest.getFullYear() + '-' + (dateActualRequest.getMonth() + 1) + '-' + dateActualRequest.getDate();
         regAlmacenado.metodoName = metodoSeleccionado.name;
         regAlmacenado.metodoId = metodoSeleccionado.code;
         if (voucherSeleccionado) {
@@ -1073,6 +1151,19 @@ export const CuracionColeccion = () => {
             event.preventDefault();
     }
 
+    const viewNewIdentificadorDialog = () => {
+        setNewIdentificadorDialog(true);
+    }
+
+    const viewNewDigitadorDialog = () => {
+        setNewDigitadorDialog(true);
+    }
+
+    const hideNewDialog = () => {
+        setNewIdentificadorDialog(false);
+        setNewDigitadorDialog(false);
+    }
+
     const setDateSeleccionadoMetodo = (options, e) => {
         setDateValueSample(e.target.value);
         options.value[options.rowIndex][options.field] = e.target.value.getDate() + '-' + (e.target.value.getMonth() + 1) + '-' + e.target.value.getFullYear();
@@ -1099,6 +1190,7 @@ export const CuracionColeccion = () => {
 
     const columnsMounts = [
         { field: 'idNum', header: 'Nº' },
+        { field: 'codeEcu', header: 'ECU' },
         { field: 'filoName', header: 'Filo' },
         { field: 'claseName', header: 'Clase' },
         { field: 'ordenName', header: 'Orden' },
@@ -1139,7 +1231,7 @@ export const CuracionColeccion = () => {
         { field: 'metodoName', header: 'Método identificación' },
         { field: 'voucherName', header: 'Voucher molecular' },
         { field: 'digitador', header: 'Digitador' },
-        { field: 'immature', header: 'Inmaduros' },
+        { field: 'immatures', header: 'Inmaduros' },
         { field: 'females', header: 'Hembras' },
         { field: 'males', header: 'Machos' },
         { field: 'gaveta', header: 'Caja' },
@@ -1158,9 +1250,8 @@ export const CuracionColeccion = () => {
 
     const requerimientoDialogFooter = (
         <>
-            {/* <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={saveSolicitud} />
-            <Button label="Guardar y eviar para validación" icon="pi pi-check" className="p-button-text" onClick={saveSendSolicitud} /> */}
-            <Button label="Regresar" icon="pi pi-chevron-up" className="p-button-text" onClick={hideDialog} />
+            <Button label="Finalizar curación" icon="pi pi-check" className="p-button-text" onClick={saveSendSolicitud} disabled={!fin} />
+            <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
         </>
     );
 
@@ -1175,6 +1266,20 @@ export const CuracionColeccion = () => {
         <>
             <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={saveMount} />
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideAlmacenDialog} />
+        </>
+    );
+
+    const newIdentificadorDialogFooter = (
+        <>
+            <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={() => saveNewColector(1)} />
+            <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideNewDialog} />
+        </>
+    );
+
+    const newDigitadorDialogFooter = (
+        <>
+            <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={() => saveNewColector(2)} />
+            <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideNewDialog} />
         </>
     );
 
@@ -1236,13 +1341,13 @@ export const CuracionColeccion = () => {
                                 </div>
                                 <div className="mx-5">
                                     <div className="p-fluid mt-2">
-                                        <DataTable value={products3} editMode="cell" className="editable-cells-table" rowHover scrollable inline style={{ fontSize: '14px', textAlign: 'center' }}
+                                        <DataTable value={products3} className="editable-cells-table" rowHover scrollable inline style={{ fontSize: '14px', textAlign: 'center' }}
                                             emptyMessage="Ninguna muestra agragada." header={"Muestras"} >
                                             {
                                                 columns.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
                                                         style={{ width: field === 'idNum' ? '1rem' : field === 'code' ? '4rem' : '5rem', textAlign: "center" }}
-                                                        editor={(options) => cellEditor(options)} />
+                                                    />
                                                 })
                                             }
                                             <Column header="Almacenado" body={almacenajeBodyTemplate} style={{ width: '5rem', textAlign: "center" }}></Column>
@@ -1336,17 +1441,19 @@ export const CuracionColeccion = () => {
                                     </div>
                                     <div className="fondo-persona col-2 justify-content-center">
                                         <h6>Datos personal</h6>
-                                        <div className="field mt-4">
+                                        <div className="field mt-4 p-inputgroup">
                                             <span className="p-float-label">
                                                 <Dropdown id="Gerero" name="Gerero" value={identificadorSeleccionado} onChange={(e) => { onIdentificadorChange(e); }} options={identificadores} optionLabel="name" />
                                                 <label htmlFor="Gerero">* Identificador</label>
                                             </span>
+                                            <Button icon="pi pi-user-plus" className="p-button-success" onClick={viewNewIdentificadorDialog} />
                                         </div>
-                                        <div className="field mt-4">
+                                        <div className="field mt-4 p-inputgroup">
                                             <span className="p-float-label">
                                                 <Dropdown id="Especie" name="Especie" value={digitadorSeleccionado} onChange={(e) => { onDigitadorChange(e); }} options={digitadores} optionLabel="name" />
                                                 <label htmlFor="Especie">* Digitador</label>
                                             </span>
+                                            <Button icon="pi pi-user-plus" className="p-button-success" onClick={viewNewDigitadorDialog} />
                                         </div>
                                     </div>
                                     <div className="fondo-inmaduros col-2 justify-content-center">
@@ -1406,7 +1513,7 @@ export const CuracionColeccion = () => {
                                         </div>
                                         <div className="field mt-4">
                                             <span className="p-float-label">
-                                                <InputTextarea id="obser" value={obsMount} onChange={(e) => { setObsMount(e.target.value); }} rows={1} cols={20} autoResize />
+                                                <InputTextarea id="obser" value={obsStored} onChange={(e) => { setObStored(e.target.value); }} rows={1} cols={20} autoResize />
                                                 <label htmlFor="obser">Observaciones</label>
                                             </span>
                                         </div>
@@ -1647,6 +1754,44 @@ export const CuracionColeccion = () => {
                                             }
                                         </DataTable>
                                     </div>
+                                </div>
+                            </div>
+                        </Dialog>
+                        <Dialog visible={newIdentificadorDialog} style={{ width: '30%' }} modal className="p-fluid" footer={newIdentificadorDialogFooter} onHide={hideNewDialog}>
+                            <div>
+                                <h5 className="m-0">Registro nuevo identificador</h5>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="box" type="text" value={nameColector} onChange={(e) => { setNameColector(e.target.value); }} />
+                                        <label htmlFor="obser">Nombres:</label>
+                                    </span>
+                                    {!nameColector && <small style={{ color: 'red' }}>Ingrese el nombre.</small>}
+                                </div>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="box" type="text" value={lastnameColector} onChange={(e) => { setLastnameColector(e.target.value); }} />
+                                        <label htmlFor="obser">Apellidos:</label>
+                                    </span>
+                                    {!lastnameColector && <small style={{ color: 'red' }}>Ingrese el apellido.</small>}
+                                </div>
+                            </div>
+                        </Dialog>
+                        <Dialog visible={newDigitadorDialog} style={{ width: '30%' }} modal className="p-fluid" footer={newDigitadorDialogFooter} onHide={hideNewDialog}>
+                            <div>
+                                <h5 className="m-0">Registro nuevo digitador</h5>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="box" type="text" value={nameColector} onChange={(e) => { setNameColector(e.target.value); }} />
+                                        <label htmlFor="obser">Nombres:</label>
+                                    </span>
+                                    {!nameColector && <small style={{ color: 'red' }}>Ingrese el nombre.</small>}
+                                </div>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="box" type="text" value={lastnameColector} onChange={(e) => { setLastnameColector(e.target.value); }} />
+                                        <label htmlFor="obser">Apellidos:</label>
+                                    </span>
+                                    {!lastnameColector && <small style={{ color: 'red' }}>Ingrese el apellido.</small>}
                                 </div>
                             </div>
                         </Dialog>

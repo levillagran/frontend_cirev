@@ -147,7 +147,7 @@ class CatalogoService {
     .get(baseURL() + "catalogos/digitadores", { headers: authHeader() });
     return res.data;
   } 
- 
+
 }
 
 export default new CatalogoService();  
