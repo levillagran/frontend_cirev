@@ -12,7 +12,6 @@ class RequerimientoService {
   }
 
   async saveRequerimiento(data) {
-    console.log(data)
     const res = await axios
     .post(baseURL() + "requerimientos/save", data, { headers: authHeader() });
     return res.data;
@@ -49,7 +48,6 @@ class RequerimientoService {
   }
 
   async saveRequerimientoColeccion(data) {
-    console.log(data)
     const res = await axios
     .post(baseURLCol() + "requerimientos/save", data, { headers: authHeader() });
     return res.data;
@@ -82,6 +80,18 @@ class RequerimientoService {
   async postSaveColector(data) { 
     const res = await axios
     .post(baseURLCol() + "requerimientos/colectorSave", data, { headers: authHeader() });
+    return res.data;
+  } 
+
+  async postSaveSolicitante(data) { 
+    const res = await axios
+    .post(baseURLCol() + "requerimientos/requestSave", data, { headers: authHeader() });
+    return res.data;
+  } 
+
+  async postSaveProyecto(data) { 
+    const res = await axios
+    .post(baseURLCol() + "requerimientos/projectSave", data, { headers: authHeader() });
     return res.data;
   } 
 

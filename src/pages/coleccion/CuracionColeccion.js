@@ -208,6 +208,7 @@ export const CuracionColeccion = () => {
         immatures: 0,
         females: 0,
         males: 0,
+        armario: null,
         storageBox: null,
         obsStored: null,
     };
@@ -285,6 +286,10 @@ export const CuracionColeccion = () => {
     const [filos, setFilos] = useState(null);
     const [filoFiltrado, setFiloFiltrado] = useState([]);
     const [filoSeleccionado, setFiloSeleccionado] = useState(null);
+
+    const [armarios, setArmarios] = useState(null);
+    const [armarioFiltrado, setArmarioFiltrado] = useState([]);
+    const [armarioSeleccionado, setArmarioSeleccionado] = useState(null);
 
     const [claseEnable, setClaseEnable] = useState(true);
     const [clases, setClases] = useState(null);
@@ -374,8 +379,6 @@ export const CuracionColeccion = () => {
     const [chgStatus, setChgStatus] = useState(emptyChangeStatus);
     const [fin, setFin] = useState(false);
 
-    const [tec, setTec] = useState('1');
-
     const [newColector, setNewColector] = useState(emptyColector);
     const [nameColector, setNameColector] = useState(null);
     const [lastnameColector, setLastnameColector] = useState(null);
@@ -393,7 +396,7 @@ export const CuracionColeccion = () => {
         getRequerimientos();
         const fechaActual = new Date();
         setDateActualRequest(fechaActual);
-        setDateActualEclosionRequest(fechaActual);
+        //setDateActualEclosionRequest(fechaActual);
     }, []);
 
     const hideDialog = () => {
@@ -627,13 +630,14 @@ export const CuracionColeccion = () => {
             setSubmitted(false);
             const fin = await CuracionService.getFinalizar(request.id);
             fin === "true" ? setFin(true) : setFin(false);
-            console.log(fin)
+            //console.log(fin)
             setProcesamientoDialog(true);
         }
         getRequerimiento();
     }
 
     const almacenar = (muestra) => {
+        setNumSample(0);
         setProcesamientoDialog(false);
         async function getAlmacenados() {
             const alma = await CuracionService.getAlmacenados(muestra.id);
@@ -651,6 +655,7 @@ export const CuracionColeccion = () => {
     }
 
     const montar = (muestra) => {
+        setNumSample(0);
         setProcesamientoDialog(false);
         async function getMontados() {
             const mount = await CuracionService.getMontados(muestra.id);
@@ -749,6 +754,15 @@ export const CuracionColeccion = () => {
             setDigitadores(digs);
         }
         getDigitadores();
+        async function getArmarios() {
+            const digis = await CatalogoService.getArmarios();
+            const digs = [];
+            digis.map((e) => {
+                digs.push({ "name": e.name, "code": e.id });
+            });
+            setArmarios(digs);
+        }
+        getArmarios();
     }
 
     const actionBodyTemplate = (rowData) => {
@@ -887,7 +901,16 @@ export const CuracionColeccion = () => {
         regMontado.sexoId = sexoSeleccionado.code;
         regMontado.identificador = identificadorSeleccionado.name;
         regMontado.identificadorId = identificadorSeleccionado.code;
-        regMontado.fechaActual = dateActualRequest.getFullYear() + '-' + (dateActualRequest.getMonth() + 1) + '-' + dateActualRequest.getDate();
+        //regMontado.fechaActual = dateActualRequest.getFullYear() + '-' + (dateActualRequest.getMonth() + 1) + '-' + dateActualRequest.getDate();
+        if (dateActualRequest.getDate() < 10 && (dateActualRequest.getMonth() + 1) < 10) {
+            regMontado.fechaActual = dateActualRequest.getFullYear() + '-0' + (dateActualRequest.getMonth() + 1) + '-0' + dateActualRequest.getDate();
+        } else if (dateActualRequest.getDate() < 10 && (dateActualRequest.getMonth() + 1) > 10) {
+            regMontado.fechaActual = dateActualRequest.getFullYear() + '-' + (dateActualRequest.getMonth() + 1) + '-0' + dateActualRequest.getDate();
+        } else if (dateActualRequest.getDate() > 10 && (dateActualRequest.getMonth() + 1) < 10) {
+            regMontado.fechaActual = dateActualRequest.getFullYear() + '-0' + (dateActualRequest.getMonth() + 1) + '-' + dateActualRequest.getDate();
+        } else {
+            regMontado.fechaActual = dateActualRequest.getFullYear() + '-' + (dateActualRequest.getMonth() + 1) + '-' + dateActualRequest.getDate();
+        }
         regMontado.metodoName = metodoSeleccionado.name;
         regMontado.metodoId = metodoSeleccionado.code;
         if (voucherSeleccionado) {
@@ -896,7 +919,18 @@ export const CuracionColeccion = () => {
         }
         regMontado.digitador = digitadorSeleccionado.name;
         regMontado.digitadorId = digitadorSeleccionado.code;
-        regMontado.fechaEclosion = dateActualEclosionRequest.getFullYear() + '-' + (dateActualEclosionRequest.getMonth() + 1) + '-' + dateActualEclosionRequest.getDate();
+        //regMontado.fechaEclosion = dateActualEclosionRequest.getFullYear() + '-' + (dateActualEclosionRequest.getMonth() + 1) + '-' + dateActualEclosionRequest.getDate();
+        if (dateActualEclosionRequest) {
+            if (dateActualEclosionRequest.getDate() < 10 && (dateActualEclosionRequest.getMonth() + 1) < 10) {
+                regMontado.fechaEclosion = dateActualEclosionRequest.getFullYear() + '-0' + (dateActualEclosionRequest.getMonth() + 1) + '-0' + dateActualEclosionRequest.getDate();
+            } else if (dateActualEclosionRequest.getDate() < 10 && (dateActualEclosionRequest.getMonth() + 1) > 10) {
+                regMontado.fechaEclosion = dateActualEclosionRequest.getFullYear() + '-' + (dateActualEclosionRequest.getMonth() + 1) + '-0' + dateActualEclosionRequest.getDate();
+            } else if (dateActualEclosionRequest.getDate() > 10 && (dateActualEclosionRequest.getMonth() + 1) < 10) {
+                regMontado.fechaEclosion = dateActualEclosionRequest.getFullYear() + '-0' + (dateActualEclosionRequest.getMonth() + 1) + '-' + dateActualEclosionRequest.getDate();
+            } else {
+                regMontado.fechaEclosion = dateActualEclosionRequest.getFullYear() + '-' + (dateActualEclosionRequest.getMonth() + 1) + '-' + dateActualEclosionRequest.getDate();
+            }
+        }
         if (metColInmaSeleccionado) {
             regMontado.metColInmaName = metColInmaSeleccionado.name;
             regMontado.metColInmaId = metColInmaSeleccionado.code;
@@ -911,7 +945,7 @@ export const CuracionColeccion = () => {
             regMontado.metColAdulName = metColAdulSeleccionado.name;
             regMontado.metColAdulId = metColAdulSeleccionado.code;
         }
-        regMontado.armario = armario;
+        regMontado.armario = armarioSeleccionado.name;
         regMontado.gaveta = gaveta;
         regMontado.obsMount = obsMount;
         montados.push(regMontado);
@@ -963,9 +997,15 @@ export const CuracionColeccion = () => {
         regAlmacenado.especieId = especieSeleccionado.code;
         regAlmacenado.identificador = identificadorSeleccionado.name;
         regAlmacenado.identificadorId = identificadorSeleccionado.code;
-        dateActualRequest.getDate() < 10 ?
-            regAlmacenado.fechaActual = dateActualRequest.getFullYear() + '-' + (dateActualRequest.getMonth() + 1) + '-0' + dateActualRequest.getDate() :
+        if (dateActualRequest.getDate() < 10 && (dateActualRequest.getMonth() + 1) < 10) {
+            regAlmacenado.fechaActual = dateActualRequest.getFullYear() + '-0' + (dateActualRequest.getMonth() + 1) + '-0' + dateActualRequest.getDate();
+        } else if (dateActualRequest.getDate() < 10 && (dateActualRequest.getMonth() + 1) > 10) {
+            regAlmacenado.fechaActual = dateActualRequest.getFullYear() + '-' + (dateActualRequest.getMonth() + 1) + '-0' + dateActualRequest.getDate();
+        } else if (dateActualRequest.getDate() > 10 && (dateActualRequest.getMonth() + 1) < 10) {
+            regAlmacenado.fechaActual = dateActualRequest.getFullYear() + '-0' + (dateActualRequest.getMonth() + 1) + '-' + dateActualRequest.getDate();
+        } else {
             regAlmacenado.fechaActual = dateActualRequest.getFullYear() + '-' + (dateActualRequest.getMonth() + 1) + '-' + dateActualRequest.getDate();
+        }
         regAlmacenado.metodoName = metodoSeleccionado.name;
         regAlmacenado.metodoId = metodoSeleccionado.code;
         if (voucherSeleccionado) {
@@ -977,7 +1017,8 @@ export const CuracionColeccion = () => {
         regAlmacenado.immatures = immatures;
         regAlmacenado.females = females;
         regAlmacenado.males = males;
-        regAlmacenado.gaveta = gaveta;
+        regMontado.armario = 'G' + armario;
+        regAlmacenado.gaveta = 'C' + gaveta;
         regAlmacenado.obsStored = obsStored;
         almacenadosT.push(regAlmacenado);
 
@@ -1138,6 +1179,10 @@ export const CuracionColeccion = () => {
         setMetColAdulSeleccionado(e.target.value);
     }
 
+    const onArmarioChange = (e) => {
+        setArmarioSeleccionado(e.target.value);
+    }
+
     const onHabitatChange = (e) => {
         setHabitatSeleccionado(e.target.value);
     }
@@ -1211,7 +1256,7 @@ export const CuracionColeccion = () => {
         { field: 'matCria', header: 'Material criadero' },
         { field: 'habitatName', header: 'Habitat' },
         { field: 'metColAdulName', header: 'Metodo colecta adultos' },
-        { field: 'armario', header: 'Armario' },
+        { field: 'armarioName', header: 'Armario' },
         { field: 'gaveta', header: 'Caja' },
         { field: 'obsMount', header: 'Observaciones' },
     ];
@@ -1234,16 +1279,76 @@ export const CuracionColeccion = () => {
         { field: 'immatures', header: 'Inmaduros' },
         { field: 'females', header: 'Hembras' },
         { field: 'males', header: 'Machos' },
+        { field: 'armario', header: 'Gaveta' },
         { field: 'gaveta', header: 'Caja' },
         { field: 'obsStored', header: 'Observaciones' },
     ];
 
-    const cellEditor = (options) => {
-        if (options.field === 'processingResults01' || options.field === 'processingResults02' || options.field === 'processingResults03'
-            || options.field === 'observationResults01' || options.field === 'observationResults02' || options.field === 'observationResults03')
-            return textEditor(options);
-        else if (options.field === 'dateResults01' || options.field === 'dateResults02' || options.field === 'dateResults03')
+    const cellEditorAlma = (options) => {
+        /*if (options.field === 'filoName')
             return dateEditor(options);
+        else if (options.field === 'claseName')
+            return provincesEditor(options);
+        else if (options.field === 'ordenName')
+            return cantonEditor(options);
+        else if (options.field === 'familiaName')
+            return parroquiaEditor(options);
+        else if (options.field === 'subfamiliaName')
+            return estadioEditor(options);
+        else if (options.field === 'generoName')
+            return metodoEditor(options);
+        else if (options.field === 'subgeneroName')
+            return taxonomiaEditor(options);
+        else if (options.field === 'especieName')
+            return medioEditor(options);
+        else if (options.field === 'identificador')
+            return colectorEditor(options);
+        else if (options.field === 'fechaActual')
+            return textEditor(options);
+        else if (options.field === 'metodoName')
+            return textEditor(options);
+        else if (options.field === 'voucherName')
+            return textEditor(options);
+        else if (options.field === 'digitador')
+            return textEditor(options);
+        else if (options.field === 'immatures')
+            return textEditor(options);
+        else if (options.field === 'females')
+            return textEditor(options);
+        else if (options.field === 'males')
+            return textEditor(options);
+        else if (options.field === 'gaveta')
+            return textEditor(options);
+        else if (options.field === 'obsStored')
+            return textEditor(options);*/
+    }
+    const cellEditorMont = (options) => {
+        /*if (options.field === 'collectionDate')
+            return dateEditor(options);
+        else if (options.field === 'province')
+            return provincesEditor(options);
+        else if (options.field === 'canton')
+            return cantonEditor(options);
+        else if (options.field === 'parish')
+            return parroquiaEditor(options);
+        else if (options.field === 'state')
+            return estadioEditor(options);
+        else if (options.field === 'collectionMethod')
+            return metodoEditor(options);
+        else if (options.field === 'taxonomic')
+            return taxonomiaEditor(options);
+        else if (options.field === 'dry')
+            return medioEditor(options);
+        else if (options.field === 'collectorUser')
+            return colectorEditor(options);
+        else if (options.field === 'longitude')
+            return textEditor(options);
+        else if (options.field === 'latitude')
+            return textEditor(options);
+        else if (options.field === 'placeCode')
+            return textEditor(options);
+        else if (options.field === 'observations')
+            return textEditor(options);*/
     }
 
     ////////////////////
@@ -1320,18 +1425,18 @@ export const CuracionColeccion = () => {
                         <Dialog visible={procesamientoDialog} style={{ width: '80%' }} modal className="p-fluid" footer={requerimientoDialogFooter} onHide={hideDialog}>
                             <div>
                                 <div className="flex">
-                                    <div className="col-3 grid justify-content-center">
+                                    <div className="col-2 grid justify-content-center">
                                         <img src='/assets/demo/images/galeriaColeccion/curacionCol.jpg' height="110rem" />
                                     </div>
                                     <div className="col-10">
                                         <h3 className="m-0">Registro de actividades de curación de CNVA</h3>
                                         <div className="formgroup-inline">
-                                            <div className="col-3">
+                                            <div className="col-2">
                                                 <label >Fecha requerimiento</label>
                                                 <br />
                                                 <label className="text-500">{Moment(dateValueRequest).format('DD-MM-YYYY')}</label>
                                             </div>
-                                            <div className="col-4">
+                                            <div className="col-10">
                                                 <label >Proyecto de investigación</label>
                                                 <br />
                                                 {proyectoSeleccionado && <label className="text-500">{proyectoSeleccionado.name}</label>}
@@ -1341,9 +1446,9 @@ export const CuracionColeccion = () => {
                                 </div>
                                 <div className="mx-5">
                                     <div className="p-fluid mt-2">
-                                        <DataTable value={products3} className="editable-cells-table" rowHover scrollable inline style={{ fontSize: '14px', textAlign: 'center' }}
-                                            emptyMessage="Ninguna muestra agragada." header={"Muestras"} >
-                                            {
+                                        <DataTable value={products3} className="editable-cells-table" rowHover style={{ fontSize: '14px', textAlign: 'center' }}
+                                            emptyMessage="Ninguna muestra agragada." header={"Muestras"} scrollable inline scrollHeight="400px" >
+                                            { 
                                                 columns.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
                                                         style={{ width: field === 'idNum' ? '1rem' : field === 'code' ? '4rem' : '5rem', textAlign: "center" }}
@@ -1360,179 +1465,196 @@ export const CuracionColeccion = () => {
 
                         <Dialog visible={almacenarDialog} style={{ width: '98%' }} modal className="p-fluid" footer={almacenamientoDialogFooter} onHide={hideAlmacenDialog}>
                             <div>
-                                <div className="flex mx-6">
-                                    <div className="col-3 grid justify-content-center">
-                                        <img src='/assets/demo/images/galeriaColeccion/almacenCol.jpg' height="90rem" />
-                                    </div>
-                                    <div className="col-9">
-                                        <h3 className="m-0">Registro muestras almacenadas de CNVA</h3>
-                                        <div className="formgroup-inline">
-                                            <div className="col-4">
-                                                <label >Fecha requerimiento</label>
-                                                <br />
-                                                <label className="text-500">{Moment(dateValueRequest).format('DD-MM-YYYY')}</label>
+                                <div className="flex">
+                                    <div className="col-12">
+                                        <div className="flex">
+                                            <div className="col-2 grid justify-content-center">
+                                                <img src='/assets/demo/images/galeriaColeccion/almacenCol.jpg' height="90rem" />
                                             </div>
-                                            <div className="col-5">
-                                                <label >Proyecto de investigación</label>
-                                                <br />
-                                                {proyectoSeleccionado && <label className="text-500">{proyectoSeleccionado.name}</label>}
+                                            <div className="col-10">
+                                                <h3 className="m-0">Registro muestras almacenadas de CNVA</h3>
+                                                <div className="formgroup-inline">
+                                                    <div className="col-2">
+                                                        <label >Fecha requerimiento</label>
+                                                        <br />
+                                                        <label className="text-500">{Moment(dateValueRequest).format('DD-MM-YYYY')}</label>
+                                                    </div>
+                                                    <div className="col-auto mr-3">
+                                                        <label >Proyecto de investigación</label>
+                                                        <br />
+                                                        {proyectoSeleccionado && <label className="text-500">{proyectoSeleccionado.name}</label>}
+                                                    </div>
+                                                    <div className="col-2">
+                                                        <label >Código de campo</label>
+                                                        <br />
+                                                        <label className="text-500">{muestraSeleccionado}</label>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="col-3">
-                                                <label >Código de campo</label>
-                                                <br />
-                                                <label className="text-500">{muestraSeleccionado}</label>
+                                        </div>
+                                        <div className="flex mx-2">
+                                            <div className="fondo-tipo col-2 justify-content-center">
+                                                <h6>Curación</h6>
+                                                <div className="field  mt-4">
+                                                    <span className="p-float-label">
+                                                        <Dropdown id="Filo" name="Filo" value={filoSeleccionado} onChange={(e) => { onFiloChange(e); }} options={filos} optionLabel="name" />
+                                                        <label htmlFor="Filo">* Filo</label>
+                                                    </span>
+                                                </div>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <Dropdown id="Clase" name="Clase" value={claseSeleccionado} onChange={(e) => { onClaseChange(e); }} options={clases} optionLabel="name" disabled={claseEnable} />
+                                                        <label htmlFor="Clase">* Clase</label>
+                                                    </span>
+                                                </div>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <Dropdown id="Orden" name="Orden" value={ordenSeleccionado} onChange={(e) => { onOrdenChange(e); }} options={ordenes} optionLabel="name" disabled={ordenEnable} />
+                                                        <label htmlFor="Orden">* Orden</label>
+                                                    </span>
+                                                </div>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <Dropdown id="Familia" name="Familia" value={familiaSeleccionado} onChange={(e) => { onFamiliaChange(e); }} options={familias} optionLabel="name" disabled={familiaEnable} />
+                                                        <label htmlFor="Familia">* Familia</label>
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex mx-2">
-                                    <div className="fondo-tipo col-2 justify-content-center">
-                                        <h6>Curación</h6>
-                                        <div className="field  mt-4">
-                                            <span className="p-float-label">
-                                                <Dropdown id="Filo" name="Filo" value={filoSeleccionado} onChange={(e) => { onFiloChange(e); }} options={filos} optionLabel="name" />
-                                                <label htmlFor="Filo">* Filo</label>
-                                            </span>
-                                        </div>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <Dropdown id="Clase" name="Clase" value={claseSeleccionado} onChange={(e) => { onClaseChange(e); }} options={clases} optionLabel="name" disabled={claseEnable} />
-                                                <label htmlFor="Clase">* Clase</label>
-                                            </span>
-                                        </div>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <Dropdown id="Orden" name="Orden" value={ordenSeleccionado} onChange={(e) => { onOrdenChange(e); }} options={ordenes} optionLabel="name" disabled={ordenEnable} />
-                                                <label htmlFor="Orden">* Orden</label>
-                                            </span>
-                                        </div>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <Dropdown id="Familia" name="Familia" value={familiaSeleccionado} onChange={(e) => { onFamiliaChange(e); }} options={familias} optionLabel="name" disabled={familiaEnable} />
-                                                <label htmlFor="Familia">* Familia</label>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="fondo-tipo col-2 justify-content-center">
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <Dropdown id="Subfamilia" name="Subfamilia" value={subfamiliaSeleccionado} onChange={(e) => { onSubfamiliaChange(e); }} options={subfamilias} optionLabel="name" disabled={subfamiliaEnable} />
-                                                <label htmlFor="Subfamilia">* Subfamilia</label>
-                                            </span>
-                                        </div>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <Dropdown id="Gerero" name="Gerero" value={generoSeleccionado} onChange={(e) => { onGeneroChange(e); }} options={generos} optionLabel="name" disabled={generosEnable} />
-                                                <label htmlFor="Gerero">* Gerero</label>
-                                            </span>
-                                        </div>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <Dropdown id="Subgenero" name="Subgenero" value={subgeneroSeleccionado} onChange={(e) => { onSubgeneroChange(e); }} options={subgeneros} optionLabel="name" disabled={subgenerosEnable} />
-                                                <label htmlFor="Subgenero">* Subgenero</label>
-                                            </span>
-                                        </div>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <Dropdown id="Especie" name="Especie" value={especieSeleccionado} onChange={(e) => { onEspecieChange(e); }} options={especies} optionLabel="name" disabled={especiesEnable} />
-                                                <label htmlFor="Especie">* Especie</label>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="fondo-persona col-2 justify-content-center">
-                                        <h6>Datos personal</h6>
-                                        <div className="field mt-4 p-inputgroup">
-                                            <span className="p-float-label">
-                                                <Dropdown id="Gerero" name="Gerero" value={identificadorSeleccionado} onChange={(e) => { onIdentificadorChange(e); }} options={identificadores} optionLabel="name" />
-                                                <label htmlFor="Gerero">* Identificador</label>
-                                            </span>
-                                            <Button icon="pi pi-user-plus" className="p-button-success" onClick={viewNewIdentificadorDialog} />
-                                        </div>
-                                        <div className="field mt-4 p-inputgroup">
-                                            <span className="p-float-label">
-                                                <Dropdown id="Especie" name="Especie" value={digitadorSeleccionado} onChange={(e) => { onDigitadorChange(e); }} options={digitadores} optionLabel="name" />
-                                                <label htmlFor="Especie">* Digitador</label>
-                                            </span>
-                                            <Button icon="pi pi-user-plus" className="p-button-success" onClick={viewNewDigitadorDialog} />
-                                        </div>
-                                    </div>
-                                    <div className="fondo-inmaduros col-2 justify-content-center">
-                                        <h6>Datos identificación</h6>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <Calendar id="dateReques" showIcon showButtonBar value={dateActualRequest} onChange={(e) => { setDateActualRequest(e.target.value); }}></Calendar>
-                                                <label htmlFor="dateReques">* Fecha de identificación</label>
-                                            </span>
-                                        </div>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <Dropdown id="metodo" name="metodo" value={metodoSeleccionado} onChange={(e) => { onMetodoChange(e); }} options={metodos} optionLabel="name" />
-                                                <label htmlFor="metodo">* Método de identificación</label>
-                                            </span>
-                                        </div>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <Dropdown id="voucher" name="voucher" value={voucherSeleccionado} onChange={(e) => { onVoucherhange(e); }} options={vouchers} optionLabel="name" />
-                                                <label htmlFor="voucher">Voucher molecular</label>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="fondo-adultos col-2 justify-content-center">
-                                        <h6>Inmaduros</h6>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <InputText id="hembras" type="number" min={'0'} max={'999'} step={'1'} value={immatures} onChange={(e) => { setImmatures(e.target.value); }} />
-                                                <label htmlFor="hembras">Nº Inmaduros</label>
-                                            </span>
-                                        </div>
-                                        <h6>Adultos</h6>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <InputText id="hembras" type="number" min={'0'} max={'999'} step={'1'} value={females} onChange={(e) => { setFemales(e.target.value); }} />
-                                                <label htmlFor="hembras">Nº Hembras</label>
-                                            </span>
-                                        </div>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <InputText id="machos" type="number" min={'0'} max={'999'} step={'1'} value={males} onChange={(e) => { setMales(e.target.value) }} />
-                                                <label htmlFor="machos">Nº Machos</label>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="col-2 justify-content-center">
-                                        <h6>Almacenamiento</h6>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <InputText id="hembras" type="text" value={gaveta} onChange={(e) => { setGaveta(e.target.value); }} />
-                                                <label htmlFor="hembras">* Caja de almacenamiento</label>
-                                            </span>
-                                        </div>
-                                        <div className="field mt-4">
-                                            <br />
-                                            <br />
-                                        </div>
-                                        <div className="field mt-4">
-                                            <span className="p-float-label">
-                                                <InputTextarea id="obser" value={obsStored} onChange={(e) => { setObStored(e.target.value); }} rows={1} cols={20} autoResize />
-                                                <label htmlFor="obser">Observaciones</label>
-                                            </span>
-                                        </div>
-                                        <div className="flex align-items-center justify-content-center mt-4">
-                                            {especieSeleccionado && metodoSeleccionado && gaveta && <Button icon="pi pi-plus" className="p-button-rounded p-button-success mr-2" onClick={() => setNewStoredDetail()} />}
-                                            {(!especieSeleccionado || !metodoSeleccionado || !gaveta) && <Button icon="pi pi-plus" className="p-button-rounded p-button-success mr-2" onClick={() => setNewStoredDetail()} disabled />}
-                                            {almacenadosT.length > 0 && <Button icon="pi pi-minus" className="p-button-rounded p-button-danger" onClick={() => setLessStoredDetail()} />}
-                                            {submitted && montados.length === 0 && <small style={{ color: 'red' }}>Agregue al menos un montaje.</small>}
+                                            <div className="fondo-tipo col-2 justify-content-center">
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <Dropdown id="Subfamilia" name="Subfamilia" value={subfamiliaSeleccionado} onChange={(e) => { onSubfamiliaChange(e); }} options={subfamilias} optionLabel="name" disabled={subfamiliaEnable} />
+                                                        <label htmlFor="Subfamilia">* Subfamilia</label>
+                                                    </span>
+                                                </div>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <Dropdown id="Gerero" name="Gerero" value={generoSeleccionado} onChange={(e) => { onGeneroChange(e); }} options={generos} optionLabel="name" disabled={generosEnable} />
+                                                        <label htmlFor="Gerero">* Género</label>
+                                                    </span>
+                                                </div>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <Dropdown id="Subgenero" name="Subgenero" value={subgeneroSeleccionado} onChange={(e) => { onSubgeneroChange(e); }} options={subgeneros} optionLabel="name" disabled={subgenerosEnable} />
+                                                        <label htmlFor="Subgenero">* Subgénero</label>
+                                                    </span>
+                                                </div>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <Dropdown id="Especie" name="Especie" value={especieSeleccionado} onChange={(e) => { onEspecieChange(e); }} options={especies} optionLabel="name" disabled={especiesEnable} />
+                                                        <label htmlFor="Especie">* Especie</label>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="fondo-persona col-2 justify-content-center">
+                                                <h6>Datos personal</h6>
+                                                <div className="field mt-4 p-inputgroup">
+                                                    <span className="p-float-label">
+                                                        <Dropdown id="Gerero" name="Gerero" value={identificadorSeleccionado} onChange={(e) => { onIdentificadorChange(e); }} options={identificadores} optionLabel="name" />
+                                                        <label htmlFor="Gerero">* Identificador</label>
+                                                    </span>
+                                                    <Button icon="pi pi-user-plus" className="p-button-success" onClick={viewNewIdentificadorDialog} />
+                                                </div>
+                                                <div className="field mt-4 p-inputgroup">
+                                                    <span className="p-float-label">
+                                                        <Dropdown id="Especie" name="Especie" value={digitadorSeleccionado} onChange={(e) => { onDigitadorChange(e); }} options={digitadores} optionLabel="name" />
+                                                        <label htmlFor="Especie">* Digitador</label>
+                                                    </span>
+                                                    <Button icon="pi pi-user-plus" className="p-button-success" onClick={viewNewDigitadorDialog} />
+                                                </div>
+                                            </div>
+                                            <div className="fondo-inmaduros col-2 justify-content-center">
+                                                <h6>Datos identificación</h6>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <Calendar id="dateReques" showIcon showButtonBar value={dateActualRequest} onChange={(e) => { setDateActualRequest(e.target.value); }}></Calendar>
+                                                        <label htmlFor="dateReques">* Fecha de identificación</label>
+                                                    </span>
+                                                </div>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <Dropdown id="metodo" name="metodo" value={metodoSeleccionado} onChange={(e) => { onMetodoChange(e); }} options={metodos} optionLabel="name" />
+                                                        <label htmlFor="metodo">* Método de identificación</label>
+                                                    </span>
+                                                </div>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <Dropdown id="voucher" name="voucher" value={voucherSeleccionado} onChange={(e) => { onVoucherhange(e); }} options={vouchers} optionLabel="name" />
+                                                        <label htmlFor="voucher">Voucher molecular</label>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="fondo-adultos col-2 justify-content-center">
+                                                <h6>Inmaduros</h6>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <InputText id="hembras" type="number" min={'0'} max={'999'} step={'1'} value={immatures} onChange={(e) => { setImmatures(e.target.value); }} />
+                                                        <label htmlFor="hembras">Nº Inmaduros</label>
+                                                    </span>
+                                                </div>
+                                                <h6>Adultos</h6>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <InputText id="hembras" type="number" min={'0'} max={'999'} step={'1'} value={females} onChange={(e) => { setFemales(e.target.value); }} />
+                                                        <label htmlFor="hembras">Nº Hembras</label>
+                                                    </span>
+                                                </div>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <InputText id="machos" type="number" min={'0'} max={'999'} step={'1'} value={males} onChange={(e) => { setMales(e.target.value) }} />
+                                                        <label htmlFor="machos">Nº Machos</label>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="col-2 justify-content-center">
+                                                <h6>Almacenamiento</h6>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <div className="p-inputgroup">
+                                                            <span className="p-inputgroup-addon">G:</span>
+                                                            <InputText id="gaveta" type="number" min={'1'} max={'50'} step={'1'} value={armario} onChange={(e) => { setArmario(e.target.value); }} />
+                                                            <label className='ml-6' htmlFor="gaveta">* Gaveta</label>
+                                                        </div>
+                                                    </span>
+                                                </div>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <div className="p-inputgroup">
+                                                            <span className="p-inputgroup-addon">C:</span>
+                                                            <InputText id="cajaAl" type="number" min={'1'} max={'20'} step={'1'} value={gaveta} onChange={(e) => { setGaveta(e.target.value); }} />
+                                                            <label className='ml-6' htmlFor="cajaAl">* Caja</label>
+                                                        </div>
+                                                    </span>
+                                                </div>
+                                                <div className="field mt-4">
+                                                    <br />
+                                                    <br />
+                                                </div>
+                                                <div className="field mt-4">
+                                                    <span className="p-float-label">
+                                                        <InputTextarea id="obser" value={obsStored} onChange={(e) => { setObStored(e.target.value); }} rows={1} cols={20} autoResize />
+                                                        <label htmlFor="obser">Observaciones</label>
+                                                    </span>
+                                                </div>
+                                                <div className="flex align-items-center justify-content-center mt-4">
+                                                    {especieSeleccionado && metodoSeleccionado && gaveta && <Button icon="pi pi-plus" className="p-button-rounded p-button-success mr-2" onClick={() => setNewStoredDetail()} />}
+                                                    {(!especieSeleccionado || !metodoSeleccionado || !gaveta) && <Button icon="pi pi-plus" className="p-button-rounded p-button-success mr-2" onClick={() => setNewStoredDetail()} disabled />}
+                                                    {almacenadosT.length > 0 && <Button icon="pi pi-minus" className="p-button-rounded p-button-danger" onClick={() => setLessStoredDetail()} />}
+                                                    {submitted && montados.length === 0 && <small style={{ color: 'red' }}>Agregue al menos un montaje.</small>}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="mx-4">
                                     <div className="p-fluid mt-2">
-                                        <DataTable value={almacenadosT} className="editable-cells-table" rowHover scrollable inline style={{ fontSize: '14px', textAlign: 'center' }}
-                                            emptyMessage="Ninguno almacenado." header={"Almacenados"} size="small">
+                                        <DataTable value={almacenadosT} className="editable-cells-table" rowHover style={{ fontSize: '14px', textAlign: 'center' }}
+                                            emptyMessage="Ninguno almacenado." header={"Almacenados"} size="small" scrollable scrollHeight="200px">
                                             {
                                                 columnsStored.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
                                                         style={{ width: field === 'idNum' ? '2rem' : '8rem' }}
+                                                        editor={(options) => cellEditorAlma(options)}
                                                     />
                                                 })
                                             }
@@ -1558,7 +1680,7 @@ export const CuracionColeccion = () => {
                                                         <br />
                                                         <label className="text-500">{Moment(dateValueRequest).format('DD-MM-YYYY')}</label>
                                                     </div>
-                                                    <div className="col-2">
+                                                    <div className="col-auto mr-3">
                                                         <label >Proyecto de investigación</label>
                                                         <br />
                                                         {proyectoSeleccionado && <label className="text-500">{proyectoSeleccionado.name}</label>}
@@ -1609,13 +1731,13 @@ export const CuracionColeccion = () => {
                                                 <div className="field mt-4">
                                                     <span className="p-float-label">
                                                         <Dropdown id="Gerero" name="Gerero" value={generoSeleccionado} onChange={(e) => { onGeneroChange(e); }} options={generos} optionLabel="name" disabled={generosEnable} />
-                                                        <label htmlFor="Gerero">* Gerero</label>
+                                                        <label htmlFor="Gerero">* Género</label>
                                                     </span>
                                                 </div>
                                                 <div className="field mt-4">
                                                     <span className="p-float-label">
                                                         <Dropdown id="Subgenero" name="Subgenero" value={subgeneroSeleccionado} onChange={(e) => { onSubgeneroChange(e); }} options={subgeneros} optionLabel="name" disabled={subgenerosEnable} />
-                                                        <label htmlFor="Subgenero">* Subgenero</label>
+                                                        <label htmlFor="Subgenero">* Subgénero</label>
                                                     </span>
                                                 </div>
                                                 <div className="field mt-4">
@@ -1633,11 +1755,12 @@ export const CuracionColeccion = () => {
                                             </div>
                                             <div className="fondo-persona col-2 justify-content-center">
                                                 <h6>Datos personal</h6>
-                                                <div className="field mt-4">
+                                                <div className="field mt-4 p-inputgroup">
                                                     <span className="p-float-label">
                                                         <Dropdown id="indicador" name="indicador" value={identificadorSeleccionado} onChange={(e) => { onIdentificadorChange(e); }} options={identificadores} optionLabel="name" />
                                                         <label htmlFor="indicador">* Identificador</label>
                                                     </span>
+                                                    <Button icon="pi pi-user-plus" className="p-button-success" onClick={viewNewIdentificadorDialog} />
                                                 </div>
                                                 <div className="field mt-4">
                                                     <span className="p-float-label">
@@ -1657,11 +1780,12 @@ export const CuracionColeccion = () => {
                                                         <label htmlFor="voucher">Voucher molecular</label>
                                                     </span>
                                                 </div>
-                                                <div className="field mt-4">
+                                                <div className="field mt-4 p-inputgroup">
                                                     <span className="p-float-label">
                                                         <Dropdown id="digitador" name="digitador" value={digitadorSeleccionado} onChange={(e) => { onDigitadorChange(e); }} options={digitadores} optionLabel="name" />
                                                         <label htmlFor="digitador">* Digitador</label>
                                                     </span>
+                                                    <Button icon="pi pi-user-plus" className="p-button-success" onClick={viewNewDigitadorDialog} />
                                                 </div>
                                             </div>
                                             <div className="fondo-inmaduros col-2 justify-content-center">
@@ -1711,14 +1835,14 @@ export const CuracionColeccion = () => {
                                                 <h6>Almacenamiento</h6>
                                                 <div className="field mt-4">
                                                     <span className="p-float-label">
-                                                        <InputText id="hembras" type="text" value={armario} onChange={(e) => { setArmario(e.target.value); }} />
-                                                        <label htmlFor="hembras">* Armario / estante</label>
+                                                        <Dropdown id="armario" name="armario" value={armarioSeleccionado} onChange={(e) => { onArmarioChange(e); }} options={armarios} optionLabel="name" />
+                                                        <label htmlFor="armario">* Armario / estante</label>
                                                     </span>
                                                 </div>
                                                 <div className="field mt-4">
                                                     <span className="p-float-label">
-                                                        <InputText id="hembras" type="text" value={gaveta} onChange={(e) => { setGaveta(e.target.value); }} />
-                                                        <label htmlFor="hembras">* Caja entomología / Gaveta</label>
+                                                        <InputText id="caja" type="number" min={'1'} max={'25'} step={'1'} value={gaveta} onChange={(e) => { setGaveta(e.target.value); }} />
+                                                        <label htmlFor="caja">* Caja entomología / Gaveta</label>
                                                     </span>
                                                 </div>
                                                 <div className="field mt-4">
@@ -1732,8 +1856,8 @@ export const CuracionColeccion = () => {
                                                     </span>
                                                 </div>
                                                 <div className="flex align-items-center justify-content-center mt-4">
-                                                    {sexoSeleccionado && especieSeleccionado && metodoSeleccionado && armario && gaveta && <Button icon="pi pi-plus" className="p-button-rounded p-button-success mr-2" onClick={() => setNewMountDetail()} />}
-                                                    {(!sexoSeleccionado || !especieSeleccionado || !metodoSeleccionado || !armario || !gaveta) && <Button icon="pi pi-plus" className="p-button-rounded p-button-success mr-2" onClick={() => setNewMountDetail()} disabled />}
+                                                    {sexoSeleccionado && especieSeleccionado && metodoSeleccionado && armarioSeleccionado && gaveta && <Button icon="pi pi-plus" className="p-button-rounded p-button-success mr-2" onClick={() => setNewMountDetail()} />}
+                                                    {(!sexoSeleccionado || !especieSeleccionado || !metodoSeleccionado || !armarioSeleccionado || !gaveta) && <Button icon="pi pi-plus" className="p-button-rounded p-button-success mr-2" onClick={() => setNewMountDetail()} disabled />}
                                                     {montados.length > 0 && <Button icon="pi pi-minus" className="p-button-rounded p-button-danger" onClick={() => setLessMountDetail()} />}
                                                     {submitted && montados.length === 0 && <small style={{ color: 'red' }}>Agregue al menos un montaje.</small>}
                                                 </div>
@@ -1743,12 +1867,13 @@ export const CuracionColeccion = () => {
                                 </div>
                                 <div className="mx-4">
                                     <div className="p-fluid mt-2">
-                                        <DataTable value={montados} className="editable-cells-table" rowHover scrollable inline style={{ fontSize: '14px', textAlign: 'center' }}
-                                            emptyMessage="Ninguno montado." header={"Montados"} size="small">
+                                        <DataTable value={montados} className="editable-cells-table" rowHover style={{ fontSize: '14px', textAlign: 'center' }}
+                                            emptyMessage="Ninguno montado." header={"Montados"} size="small" scrollable scrollHeight="200px">
                                             {
                                                 columnsMounts.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
                                                         style={{ width: field === 'idNum' ? '2rem' : '8rem' }}
+                                                        editor={(options) => cellEditorMont(options)}
                                                     />
                                                 })
                                             }

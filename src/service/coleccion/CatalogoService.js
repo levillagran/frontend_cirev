@@ -148,6 +148,12 @@ class CatalogoService {
     return res.data;
   } 
 
+  async getArmarios() { 
+    const res = await axios
+    .get(baseURL() + "catalogos/armarios", { headers: authHeader() });
+    return res.data;
+  } 
+
 }
 
 export default new CatalogoService();  

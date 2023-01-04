@@ -173,6 +173,30 @@ export const RequerimientosColeccion = () => {
         active: null,
     };
 
+    let emptyProyecto =
+    {
+        id: null,
+        year: null,
+        name: null,
+        authCode: null,
+        active: null,
+    };
+
+    let emptySolicitante =
+    {
+        id: null,
+        name: null,
+        secondname: null,
+        lastname: null,
+        secondlastname: null,
+        prefix: null,
+        suffix: null,
+        code: '',
+        active: null,
+        isInternal: null,
+        areaJob: null,
+    };
+
     const [medio, setMedio] = useState(null);
     const [medioSeleccionado, setMedioSeleccionado] = useState(null);
 
@@ -192,10 +216,14 @@ export const RequerimientosColeccion = () => {
     const [obsRegister, setObsRegister] = useState('');
 
     const [submitted, setSubmitted] = useState(false);
+    const [submitPro, setSubmitPro] = useState(false);
+    const [submitSoli, setSubmitSoli] = useState(false);
     const [loadDialog, setLoadDialog] = useState(false);
     const [pdfDialog, setPdfDialog] = useState(false);
     const [solicitudDialog, setSolicitudDialog] = useState(false);
     const [newColectorDialog, setNewColectorDialog] = useState(false);
+    const [newSolicitanteDialog, setNewSolicitanteDialog] = useState(false);
+    const [newProyectoDialog, setNewProyectoDialog] = useState(false);
 
     const [requerimientos, setRequerimientos] = useState(null);
     const [requerimientoId, setRequerimientoId] = useState(null);
@@ -288,6 +316,20 @@ export const RequerimientosColeccion = () => {
     const [nameColector, setNameColector] = useState(null);
     const [lastnameColector, setLastnameColector] = useState(null);
 
+    const [newSolicitante, setNewSolicitante] = useState(emptySolicitante);
+    const [nameSoli, setNameSoli] = useState(null);
+    const [secondSoli, setSecondSoli] = useState(null);
+    const [lastnameSoli, setLastnameSoli] = useState(null);
+    const [seclastSoli, setSeclastSoli] = useState(null);
+    const [prefix, setPrefix] = useState(null);
+    const [suffix, setSuffix] = useState(null);
+    const [areaJob, setAreaJob] = useState(null);
+
+    const [newPro, setNewPro] = useState(emptyProyecto);
+    const [namePro, setNamePro] = useState(null);
+    const [year, setYear] = useState(null);
+    const [authCode, setAuthCode] = useState(null);
+
     useEffect(() => {
         async function getRequerimientos() {
             const reque = await RequerimientoService.getRequerimientosColeccion();
@@ -311,10 +353,21 @@ export const RequerimientosColeccion = () => {
 
     const hideNewDialog = () => {
         setNewColectorDialog(false);
+        setNewSolicitanteDialog(false);
+        setNewProyectoDialog(false);
+        setSubmitPro(false);
     }
 
     const viewNewDialog = () => {
         setNewColectorDialog(true);
+    }
+
+    const viewNewReqDialog = () => {
+        setNewSolicitanteDialog(true);
+    }
+
+    const viewNewProDialog = () => {
+        setNewProyectoDialog(true);
     }
 
     const setIsInternalValue = (value) => {
@@ -323,7 +376,7 @@ export const RequerimientosColeccion = () => {
             const usuarios = await CatalogoService.getUsuarios(value);
             const users = [];
             usuarios.map((e) => {
-                users.push({ "name": e.prefix + " " + e.name + " " + e.lastname + e.suffix, "code": e.id });
+                users.push({ "name": e.prefix + " " + e.name + " " + e.lastname + ", " + e.suffix, "code": e.id });
             });
             setUsuarios(users);
         }
@@ -369,7 +422,7 @@ export const RequerimientosColeccion = () => {
             const usuarios = await CatalogoService.getUsuarios(isInternal);
             const users = [];
             usuarios.map((e) => {
-                users.push({ "name": e.prefix + " " + e.name + " " + e.lastname + e.suffix, "code": e.id });
+                users.push({ "name": e.prefix + " " + e.name + " " + e.lastname + ", " + e.suffix, "code": e.id });
             });
             setUsuarios(users);
         }
@@ -411,7 +464,7 @@ export const RequerimientosColeccion = () => {
         }
         getMetodColectaInma();
         async function getTaxonomia() {
-            const tax = await CatalogoService.getTaxonomiaColeccion();
+            const tax = await CatalogoService.getTaxonomia();
             const taxon = [];
             tax.map((e) => {
                 taxon.push({ "name": e.name, "code": e.id });
@@ -449,6 +502,7 @@ export const RequerimientosColeccion = () => {
     const saveSolicitud = () => {
         setSubmitted(true);
         async function saveRequest(request) {
+            console.log(request)
             const reque = await RequerimientoService.saveRequerimientoColeccion(request);
             setRequerimientos(reque);
         }
@@ -588,6 +642,67 @@ export const RequerimientosColeccion = () => {
             setLastnameColector(null);
         } else {
             toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Colector no registrado', life: 5000 });
+        }
+    }
+
+    const saveNewSolicitante = () => {
+        async function save(colector) {
+            const colec = await RequerimientoService.postSaveSolicitante(colector);
+            const colecs = [];
+            colec.map((e) => {
+                colecs.push({ "name": e.prefix + " " + e.name + " " + e.lastname + ", " + e.suffix, "code": e.id });
+            });
+            setUsuarios(colecs);
+        }
+        if (nameSoli && lastnameSoli) {
+            setSubmitSoli(false);
+            newSolicitante.name = nameSoli;
+            newSolicitante.lastname = lastnameSoli;
+            newSolicitante.secondname = secondSoli;
+            newSolicitante.secondlastname = seclastSoli;
+            newSolicitante.prefix = prefix;
+            newSolicitante.suffix = suffix
+            newSolicitante.isInternal = isInternal;
+            newSolicitante.code = isInternal === true ? "true" : "false";
+            newSolicitante.active = true;
+            newSolicitante.areaJob = areaJob;
+            save(newSolicitante);
+            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Solicitante registrado', life: 5000 });
+            setNewSolicitanteDialog(false);
+            setNewSolicitante(emptySolicitante);
+            setNameSoli(null);
+            setLastnameSoli(null);
+        } else {
+            setSubmitSoli(true);
+            toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Solicitante no registrado', life: 5000 });
+        }
+    }
+
+    const saveNewProyecto = () => {
+        async function save(colector) {
+            const colec = await RequerimientoService.postSaveProyecto(colector);
+            const colecs = [];
+            colec.map((e) => {
+                colecs.push({ "name": e.name, "code": e.id });
+            });
+            setProyectos(colecs);
+        }
+        if (namePro && year && authCode) {
+            setSubmitPro(false);
+            newPro.name = namePro;
+            newPro.year = year;
+            newPro.authCode = authCode;
+            newPro.active = true;
+            save(newPro);
+            toast.current.show({ severity: 'success', summary: 'Exito', detail: 'Proyecto registrado', life: 5000 });
+            setNewProyectoDialog(false);
+            setNewPro(emptyProyecto);
+            setNamePro(null);
+            setYear(null);
+            setAuthCode(null);
+        } else {
+            setSubmitPro(true);
+            toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Proyecto no registrado', life: 5000 });
         }
     }
 
@@ -804,6 +919,7 @@ export const RequerimientosColeccion = () => {
     const editRequest = (request) => {
         async function getRequerimiento() {
             const req = await RequerimientoService.getRequerimientoColeccion(request.id);
+            console.log(req)
             setProyectoSeleccionado({ "name": req.areaProject, "code": req.areaProjectId });
             colectorProyecto(req.areaProjectId);
             setRequerimientoId(request.id);
@@ -1043,6 +1159,7 @@ export const RequerimientosColeccion = () => {
         setMedioSeleccionado(null);
         setColectorSeleccionado(null);*/
         emptySample.idNum = numSample + 1;
+        emptySample.numberContainersTubes = 1;
         products3.push(emptySample);
         setNumSample(numSample + 1);
     }
@@ -1172,7 +1289,7 @@ export const RequerimientosColeccion = () => {
     }
 
     const estadioEditor = (options) => {
-        setEstadioSeleccionado(null);
+        //setEstadioSeleccionado(null);
         return (
             <Dropdown value={estadioSeleccionado} options={estadios} onChange={(e) => { onEstadioChange(options, e); }} optionLabel="name" />
         );
@@ -1205,6 +1322,7 @@ export const RequerimientosColeccion = () => {
     const columns = [
         { field: 'idNum', header: 'Nº' },
         { field: 'placeCode', header: 'Id campo' },
+        { field: 'numberContainersTubes', header: 'Nº contenedores / tubos' },
         { field: 'collectionDate', header: 'Fecha colecta' },
         { field: 'province', header: 'Provincia' },
         { field: 'canton', header: 'Cantón' },
@@ -1215,8 +1333,7 @@ export const RequerimientosColeccion = () => {
         { field: 'collectionMethod', header: 'Método de colecta' },
         { field: 'taxonomic', header: 'Taxón' },
         { field: 'dry', header: 'Medio' },
-        { field: 'numberContainersTubes', header: 'Nº contenedores / tubos' },
-        { field: 'colectorUser', header: 'Nombre de colector' },
+        { field: 'collectorUser', header: 'Nombre de colector' },
         { field: 'observations', header: 'Observaciones' }
     ];
 
@@ -1237,9 +1354,15 @@ export const RequerimientosColeccion = () => {
             return taxonomiaEditor(options);
         else if (options.field === 'dry')
             return medioEditor(options);
-        else if (options.field === 'colectorUser')
+        else if (options.field === 'collectorUser')
             return colectorEditor(options);
-        else
+        else if (options.field === 'longitude')
+            return textEditor(options);
+        else if (options.field === 'latitude')
+            return textEditor(options);
+        else if (options.field === 'placeCode')
+            return textEditor(options);
+        else if (options.field === 'observations')
             return textEditor(options);
     }
 
@@ -1248,7 +1371,7 @@ export const RequerimientosColeccion = () => {
     const requerimientoDialogFooter = (
         <>
             <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={saveSolicitud} />
-            <Button label="Guardar y enviar a procesar" icon="pi pi-check" className="p-button-text" onClick={saveSendSolicitud}  />
+            <Button label="Guardar y enviar a procesar" icon="pi pi-check" className="p-button-text" onClick={saveSendSolicitud} />
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
         </>
     );
@@ -1267,6 +1390,19 @@ export const RequerimientosColeccion = () => {
         </>
     );
 
+    const newSolicitanteDialogFooter = (
+        <>
+            <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={saveNewSolicitante} />
+            <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideNewDialog} />
+        </>
+    );
+
+    const newProyectoDialogFooter = (
+        <>
+            <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={saveNewProyecto} />
+            <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideNewDialog} />
+        </>
+    );
 
     const colectorEditor = (options) => {
         setColectorSeleccionado(null);
@@ -1348,16 +1484,22 @@ export const RequerimientosColeccion = () => {
                                             </div>
                                             <div className="col-3">
                                                 <label htmlFor="name">Usuario solicitante</label>
-                                                <AutoComplete placeholder="Buscar" id="dd" dropdown value={usuarioSeleccionado} onChange={(e) => { setUsuarioSeleccionadoMetodo(e); }}
-                                                    suggestions={usuarioFiltrado} completeMethod={searchUsuario} field="name" />
-                                                {submitted && !usuarioSeleccionado && <small style={{ color: 'red' }}>Usuario es requerido.</small>}
+                                                <div className="p-inputgroup">
+                                                    <AutoComplete placeholder="Buscar" id="dd" dropdown value={usuarioSeleccionado} onChange={(e) => { setUsuarioSeleccionadoMetodo(e); }}
+                                                        suggestions={usuarioFiltrado} completeMethod={searchUsuario} field="name" />
+                                                    {submitted && !usuarioSeleccionado && <small style={{ color: 'red' }}>Usuario es requerido.</small>}
+                                                    <Button icon="pi pi-user-plus" className="p-button-success" onClick={viewNewReqDialog} title="Agregar solicitante" />
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="formgroup-inline">
                                             <div className="col-4">
                                                 <label htmlFor="name">Proyecto de investigación</label>
-                                                <AutoComplete placeholder="Buscar" id="dd" dropdown value={proyectoSeleccionado} onChange={(e) => { setProyectoSeleccionadoMetodo(e); colectorProyecto(e.target.value.code); }} suggestions={proyectoFiltrado} completeMethod={searchProyecto} field="name" />
-                                                {submitted && !proyectoSeleccionado && <small style={{ color: 'red' }}>Proyecto es requerido.</small>}
+                                                <div className="p-inputgroup">
+                                                    <AutoComplete placeholder="Buscar" id="dd" dropdown value={proyectoSeleccionado} onChange={(e) => { setProyectoSeleccionadoMetodo(e); colectorProyecto(e.target.value.code); }} suggestions={proyectoFiltrado} completeMethod={searchProyecto} field="name" />
+                                                    {submitted && !proyectoSeleccionado && <small style={{ color: 'red' }}>Proyecto es requerido.</small>}
+                                                    <Button icon="pi pi-plus-circle" className="p-button-success" onClick={viewNewProDialog} title="Agregar proyecto" />
+                                                </div>
                                             </div>
                                             <div className="col-3">
                                                 <label htmlFor="name">Estadio de artrópodos</label>
@@ -1376,7 +1518,7 @@ export const RequerimientosColeccion = () => {
                                         </div>
                                         <div className="formgroup-inline">
                                             <div className="col-7">
-                                                <label htmlFor="name">Analisis requerido</label>
+                                                <label htmlFor="name">Análisis requerido</label>
                                                 <SelectButton value={anali} options={analisis} onChange={(e) => setAnali(e.value)} optionLabel="name" multiple />
                                                 {submitted && !anali && <small style={{ color: 'red' }}>Analisis es requerido.</small>}
                                             </div>
@@ -1394,7 +1536,7 @@ export const RequerimientosColeccion = () => {
                                             {
                                                 columns.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
-                                                        style={{ width: (field === 'idNum') ? '2rem' : (field === 'placeCode') ? '8rem' : (field === 'collectionDate') ? '8rem' : (field === 'containers') ? '8rem' : (field === 'observations') ? '15rem' : (field === 'colectorUser') ? '12rem' : '7rem' }}
+                                                        style={{ width: (field === 'idNum') ? '2rem' : (field === 'placeCode') ? '8rem' : (field === 'collectionDate') ? '8rem' : (field === 'containers') ? '8rem' : (field === 'observations') ? '15rem' : (field === 'collectorUser') ? '12rem' : '7rem' }}
                                                         editor={(options) => cellEditor(options)} />
                                                 })
                                             }
@@ -1424,6 +1566,81 @@ export const RequerimientosColeccion = () => {
                                         <label htmlFor="obser">Apellidos:</label>
                                     </span>
                                     {!lastnameColector && <small style={{ color: 'red' }}>Ingrese el apellido.</small>}
+                                </div>
+                            </div>
+                        </Dialog>
+                        <Dialog visible={newSolicitanteDialog} style={{ width: '30%' }} modal className="p-fluid" footer={newSolicitanteDialogFooter} onHide={hideNewDialog}>
+                            <div>
+                                <h5 className="m-0">Registro nuevo solicitante</h5>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="nameSoli" type="text" value={nameSoli} onChange={(e) => { setNameSoli(e.target.value); }} />
+                                        <label htmlFor="nameSoli">Primer nombre:</label>
+                                    </span>
+                                    {!nameSoli && submitSoli && <small style={{ color: 'red' }}>Ingrese el nombre.</small>}
+                                </div>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="secondSoli" type="text" value={secondSoli} onChange={(e) => { setSecondSoli(e.target.value); }} />
+                                        <label htmlFor="secondSoli">Segundo nombre:</label>
+                                    </span>
+                                </div>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="lastnameSoli" type="text" value={lastnameSoli} onChange={(e) => { setLastnameSoli(e.target.value); }} />
+                                        <label htmlFor="lastnameSoli">Apellido paterno:</label>
+                                    </span>
+                                    {!lastnameSoli && submitSoli && <small style={{ color: 'red' }}>Ingrese el apellido.</small>}
+                                </div>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="seclastSoli" type="text" value={seclastSoli} onChange={(e) => { setSeclastSoli(e.target.value); }} />
+                                        <label htmlFor="seclastSoli">Apellido materno:</label>
+                                    </span>
+                                </div>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="prefix" type="text" value={prefix} onChange={(e) => { setPrefix(e.target.value); }} />
+                                        <label htmlFor="prefix">Prefijo:</label>
+                                    </span>
+                                </div>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="suffix" type="text" value={suffix} onChange={(e) => { setSuffix(e.target.value); }} />
+                                        <label htmlFor="suffix">Sufijo:</label>
+                                    </span>
+                                </div>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="suffix" type="text" value={areaJob} onChange={(e) => { setAreaJob(e.target.value); }} />
+                                        <label htmlFor="suffix">Área de trabajo:</label>
+                                    </span>
+                                </div>
+                            </div>
+                        </Dialog>
+                        <Dialog visible={newProyectoDialog} style={{ width: '30%' }} modal className="p-fluid" footer={newProyectoDialogFooter} onHide={hideNewDialog}>
+                            <div>
+                                <h5 className="m-0">Registro nuevo proyecto</h5>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="namePro" type="text" value={namePro} onChange={(e) => { setNamePro(e.target.value); }} />
+                                        <label htmlFor="namePro">Nombre:</label>
+                                    </span>
+                                    {!namePro && submitPro && <small style={{ color: 'red' }}>Ingrese el nombre del proyecto.</small>}
+                                </div>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="yearPro" type="text" value={year} onChange={(e) => { setYear(e.target.value); }} />
+                                        <label htmlFor="yearPro">Año:</label>
+                                    </span>
+                                    {!year && submitPro && <small style={{ color: 'red' }}>Ingrese el año del proyecto.</small>}
+                                </div>
+                                <div className="field mt-4">
+                                    <span className="p-float-label">
+                                        <InputText id="auth" type="text" value={authCode} onChange={(e) => { setAuthCode(e.target.value); }} />
+                                        <label htmlFor="auth">Código de autorización del proyecto:</label>
+                                    </span>
+                                    {!authCode && submitPro && <small style={{ color: 'red' }}>Ingrese el código de autorización del proyecto.</small>}
                                 </div>
                             </div>
                         </Dialog>
