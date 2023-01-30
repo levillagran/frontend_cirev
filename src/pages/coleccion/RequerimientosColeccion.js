@@ -1531,8 +1531,8 @@ export const RequerimientosColeccion = () => {
                                 </div>
                                 <div className="mx-5">
                                     <div className="p-fluid mt-2">
-                                        <DataTable value={products3} editMode="cell" className="editable-cells-table" rowHover scrollable inline style={{ fontSize: '14px', textAlign: 'center' }}
-                                            emptyMessage="Ninguna muestra agragada." header={"Muestras"} size="small">
+                                        <DataTable value={products3} editMode="cell" className="editable-cells-table" rowHover inline style={{ fontSize: '14px', textAlign: 'center' }}
+                                            emptyMessage="Ninguna muestra agragada." header={"Muestras"} size="small" scrollable scrollHeight="400px">
                                             {
                                                 columns.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}

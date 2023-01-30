@@ -14,7 +14,7 @@ import { Dropdown } from 'primereact/dropdown';
 import Moment from 'moment';
 
 import CuracionService from '../../service/coleccion/CuracionService';
-import EstadoService from '../../service/EstadoService';
+import EstadoService from '../../service/coleccion/EstadoService';
 import CatalogoService from '../../service/coleccion/CatalogoService';
 
 import { locale, addLocale } from 'primereact/api';
@@ -153,6 +153,7 @@ export const CuracionColeccion = () => {
         metColAdulName: null,
         metColAdulId: null,
         armario: null,
+        armarioName: null,
         gaveta: null,
         obsMount: null,
     };
@@ -409,8 +410,8 @@ export const CuracionColeccion = () => {
         setAlmacenarDialog(false);
         setMontajeDialog(false);
         async function getfin() {
-            const fin = await CuracionService.getFinalizar(requerimientoId);
-            fin === "true" ? setFin(true) : setFin(false);
+            const fi = await CuracionService.getFinalizar(requerimientoId);
+            setFin(fi);
         }
         getfin();
         setProcesamientoDialog(true);
@@ -495,8 +496,8 @@ export const CuracionColeccion = () => {
             setSubmitted(false);
         }
         async function getfin() {
-            const fin = await CuracionService.getFinalizar(requerimientoId);
-            fin === "true" ? setFin(true) : setFin(false);
+            const fi = await CuracionService.getFinalizar(requerimientoId);
+            setFin(fi);
         }
         if (almacenadosT.length > 0) {
             almacenadosT.map(e => {
@@ -513,6 +514,7 @@ export const CuracionColeccion = () => {
                     immatures: e.immatures,
                     females: e.females,
                     males: e.males,
+                    armario: e.armario,
                     storageBox: e.gaveta,
                     obsStored: e.obsStored,
                 };
@@ -547,8 +549,8 @@ export const CuracionColeccion = () => {
             setSubmitted(false);
         }
         async function getfin() {
-            const fin = await CuracionService.getFinalizar(requerimientoId);
-            fin === "true" ? setFin(true) : setFin(false);
+            const fi = await CuracionService.getFinalizar(requerimientoId);
+            setFin(fi);
         }
         if (montados.length > 0) {
             montados.map(e => {
@@ -574,7 +576,7 @@ export const CuracionColeccion = () => {
                 regMontar.gaveta = e.gaveta;
                 montarArr.push(regMontar);
             });
-            //console.log(montarArr);
+            console.log(montarArr);
             saveRequest(montarArr);
             setMontarArr([]);
             setMontajeDialog(false);
@@ -588,12 +590,12 @@ export const CuracionColeccion = () => {
     }
 
     const saveSendSolicitud = () => {
-        setSubmitted(true);
         async function changeStatus(chgSt) {
             const reque = await EstadoService.changeStatus(chgSt);
-            //setRequerimientos(reque);
+            setRequerimientos(reque);
         }
-        if (submitted) {
+        
+        if (fin) {
             chgStatus.requerimientoId = requerimientoId;
             chgStatus.estadoId = 3;
             changeStatus(chgStatus);
@@ -628,9 +630,8 @@ export const CuracionColeccion = () => {
             });
             setProducts3(products2);
             setSubmitted(false);
-            const fin = await CuracionService.getFinalizar(request.id);
-            fin === "true" ? setFin(true) : setFin(false);
-            //console.log(fin)
+            const fi = await CuracionService.getFinalizar(request.id);
+            setFin(fi);
             setProcesamientoDialog(true);
         }
         getRequerimiento();
@@ -879,6 +880,7 @@ export const CuracionColeccion = () => {
     const [almacenarArr, setAlmacenarArr] = useState([]);
 
     const setNewMountDetail = () => {
+        console.log(armarioSeleccionado)
         setRegMontado(emptyRegMontado);
         regMontado.idNum = numSample + 1;
         regMontado.filoName = filoSeleccionado.name;
@@ -945,7 +947,9 @@ export const CuracionColeccion = () => {
             regMontado.metColAdulName = metColAdulSeleccionado.name;
             regMontado.metColAdulId = metColAdulSeleccionado.code;
         }
-        regMontado.armario = armarioSeleccionado.name;
+
+        regMontado.armarioName = armarioSeleccionado.name;
+        regMontado.armario = armarioSeleccionado.code;
         regMontado.gaveta = gaveta;
         regMontado.obsMount = obsMount;
         montados.push(regMontado);
@@ -1017,7 +1021,7 @@ export const CuracionColeccion = () => {
         regAlmacenado.immatures = immatures;
         regAlmacenado.females = females;
         regAlmacenado.males = males;
-        regMontado.armario = 'G' + armario;
+        regAlmacenado.armario = 'G' + armario;
         regAlmacenado.gaveta = 'C' + gaveta;
         regAlmacenado.obsStored = obsStored;
         almacenadosT.push(regAlmacenado);
@@ -1412,7 +1416,7 @@ export const CuracionColeccion = () => {
                             dataKey="id" paginator rows={5} rowsPerPageOptions={[5, 10, 25]} className=""
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Página {first} / {last} , {totalRecords} Requerimientos"
-                            globalFilter={globalFilter} emptyMessage="Requerimientos no encontrados." header={header}>
+                            globalFilter={globalFilter} emptyMessage="No hay requerimientos para la curación." header={header}>
                             <Column body={actionBodyTemplate} style={{ width: '3rem' }}></Column>
                             <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '8rem' }}></Column>
                             <Column field="entryDate" header="Fecha de Registro" sortable body={entryDateBodyTemplate} style={{ width: '7rem' }}></Column>
@@ -1448,7 +1452,7 @@ export const CuracionColeccion = () => {
                                     <div className="p-fluid mt-2">
                                         <DataTable value={products3} className="editable-cells-table" rowHover style={{ fontSize: '14px', textAlign: 'center' }}
                                             emptyMessage="Ninguna muestra agragada." header={"Muestras"} scrollable inline scrollHeight="400px" >
-                                            { 
+                                            {
                                                 columns.map(({ field, header }) => {
                                                     return <Column key={field} field={field} header={header}
                                                         style={{ width: field === 'idNum' ? '1rem' : field === 'code' ? '4rem' : '5rem', textAlign: "center" }}

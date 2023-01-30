@@ -33,7 +33,9 @@ export const ReporteResultadosColeccion = () => {
         id: null,
         reportDate: '',
         reportResults: '',
-        observationsReport: '',
+        observationsReport: null,
+        anexos: null,
+        observationsClient: null,
         reportByUserId: null
     };
 
@@ -65,6 +67,10 @@ export const ReporteResultadosColeccion = () => {
     const [requerimientos, setRequerimientos] = useState(null);
     const [requerimientoId, setRequerimientoId] = useState(null);
 
+    const [obsResults, setObsResults] = useState(null);
+    const [obsClient, setObsClient] = useState(null);
+    const [anexos, setAnexos] = useState(null);
+
     const [proyectoSeleccionado, setProyectoSeleccionado] = useState(null);
 
     const [analisisSeleccionado, setAnalisisSeleccionado] = useState(null);
@@ -72,7 +78,6 @@ export const ReporteResultadosColeccion = () => {
     const [tipoMuestraSeleccionado, setTipoMuestraSeleccionado] = useState(null);
 
     const [results, setResults] = useState('');
-    const [obsResults, setObsResults] = useState(null);
 
     const [request, setRequest] = useState(requestEmpty);
 
@@ -112,12 +117,12 @@ export const ReporteResultadosColeccion = () => {
             const reque = await ResultadoService.saveRequerimiento(request);
             setRequerimientos(reque);
         }
-        if (submitted && dateValueRequest && results) {
+        if (true) {
             setRequest(requestEmpty);
             request.id = requerimientoId;
-            request.reportDate = dateValueRequest.getDate() + '-' + (dateValueRequest.getMonth() + 1) + '-' + dateValueRequest.getFullYear();
-            request.reportResults = results;
             request.observationsReport = obsResults;
+            request.anexos = anexos;
+            request.observationsClient = obsClient;
             const user = JSON.parse(localStorage.getItem('user'));
             request.reportByUserId = user.id;
             saveRequest(request);
@@ -130,26 +135,12 @@ export const ReporteResultadosColeccion = () => {
     }
 
     const editRequest = (request) => {
+        setRequerimientoId(request.id);
         async function getRequerimiento() {
             const req = await ResultadoService.getRequerimiento(request.id);
-            setProyectoSeleccionado({ "name": req.areaProject, "code": req.areaProjectId });
-            setRequerimientoId(request.id);
-            setAnalisisSeleccionado({ "name": req.analysis, "code": req.analysisId });
-            setIsSequence(req.isSequenced);
-
-            setTipoMuestraSeleccionado({ "name": req.typeSample, "code": req.typeSampleId });
-            req.reportDate ? setDateValueRequest(new Date(req.reportDate)) : setDateValueRequest(new Date());
-
-            setResults(req.reportResults);
             setObsResults(req.observationsReport);
-            setNumSample(req.numberSamples);
-            setNumProcessedSample(req.numberProcessedSamples);
-
-            setProducts2([]);
-            req.details.map((e, index) => {
-                products2.push({ "idNum": index + 1, ...e });
-            });
-            setProducts3(products2);
+            setAnexos(req.anexos);
+            setObsClient(req.observationsClient);
             setSubmitted(false);
             setSolicitudDialog(true);
         }
@@ -281,18 +272,26 @@ export const ReporteResultadosColeccion = () => {
         )
     }
 
-    const reqUserBodyTemplate = (rowData) => {
+    const individualsBodyTemplate = (rowData) => {
         return (
             <>
-                {rowData.requerimentUser}
+                {rowData.numberIndividuals}
             </>
         )
     }
 
-    const recepUserBodyTemplate = (rowData) => {
+    const storagesBodyTemplate = (rowData) => {
         return (
             <>
-                {rowData.receptionUser}
+                {rowData.numberStorages}
+            </>
+        )
+    }
+
+    const mountsBodyTemplate = (rowData) => {
+        return (
+            <>
+                {rowData.numberMounts}
             </>
         )
     }
@@ -313,6 +312,16 @@ export const ReporteResultadosColeccion = () => {
     const onObsResultsChange = (e) => {
         const val = (e.target && e.target.value) || '';
         setObsResults(val);
+    }
+
+    const onAnexosChange = (e) => {
+        const val = (e.target && e.target.value) || '';
+        setAnexos(val);
+    }
+
+    const onObsClientChange = (e) => {
+        const val = (e.target && e.target.value) || '';
+        setObsClient(val);
     }
 
     ////////////////////
@@ -387,98 +396,41 @@ export const ReporteResultadosColeccion = () => {
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Página {first} / {last} , {totalRecords} Requerimientos"
                             globalFilter={globalFilter} emptyMessage="Requerimientos no encontrados." header={header}>
-                            <Column body={actionBodyTemplate} style={{ width: '7rem' }}></Column>
-                            <Column field="number" header="Número" sortable body={numberBodyTemplate} style={{ width: '10rem' }}></Column>
+                            <Column body={actionBodyTemplate} style={{ width: '11rem' }}></Column>
+                            <Column field="number" header="Número de requerimiento" sortable body={numberBodyTemplate} style={{ width: '10rem' }}></Column>
                             <Column field="entryDate" header="Fecha Ingreso" sortable body={entryDateBodyTemplate} style={{ width: '6rem' }}></Column>
                             <Column field="project" header="Proyecto" sortable body={proyectoBodyTemplate} style={{ width: '15rem' }}></Column>
                             <Column field="analysis" header="Análisis" sortable body={analisisBodyTemplate} style={{ width: '7rem' }}></Column>
-                            <Column field="typeSample" header="Tipo de Muestra" sortable body={typeSampleBodyTemplate} style={{ width: '7rem' }}></Column>
-                            <Column field="numSamples" header="Nº Muestras" sortable body={numSmplesBodyTemplate} style={{ width: '6rem' }}></Column>
-                            <Column field="reqUser" header="Usuario requerente" sortable body={reqUserBodyTemplate} style={{ width: '7rem' }}></Column>
-                            <Column field="recepUser" header="Usuario recepción" sortable body={recepUserBodyTemplate} style={{ width: '7rem' }}></Column>
-                            <Column field="sequence" header="Secuenciación" sortable body={sequenceBodyTemplate} style={{ width: '6rem' }}></Column>
+                            <Column field="numSamples" header="Nº contenedores tubos" sortable body={numSmplesBodyTemplate} style={{ width: '10rem' }}></Column>
+                            <Column field="numIndividual" header="Nº Total de especímenes" sortable body={individualsBodyTemplate} style={{ width: '10rem' }}></Column>
+                            <Column field="numStored" header="Nº de especímenes Almacenados" sortable body={storagesBodyTemplate} style={{ width: '10rem' }}></Column>
+                            <Column field="numMount" header="Nº de especímenes Montados" sortable body={mountsBodyTemplate} style={{ width: '10rem' }}></Column>
                         </DataTable>
 
-                        <Dialog visible={solicitudDialog} style={{ width: '98%' }} modal className="p-fluid" footer={requerimientoDialogFooter} onHide={hideDialog}>
+                        <Dialog visible={solicitudDialog} style={{ width: '50%' }} modal className="p-fluid" header="Información de registro de reporte de resultados" footer={requerimientoDialogFooter} onHide={hideDialog}>
                             <div>
                                 <div className="flex">
-                                    <div className="col-2 grid justify-content-center">
-                                        <img src='/assets/demo/images/galeriaSistema/resultados.jpg' width="160rem" height="230rem" />
+                                    <div className="col-4 grid justify-content-center">
+                                        <img src='/assets/demo/images/galeriaSistema/resultados.jpg' width="100%"/>
                                     </div>
-                                    <div className="col-10">
-                                        <h3 className="m-0">Registro de reporte de resultados</h3>
-                                        <div className="formgroup-inline">
-                                            <div className="col-6">
-                                                <label >Proyecto de investigación</label>
-                                                <br />
-                                                {proyectoSeleccionado && <label className="text-500">{proyectoSeleccionado.name}</label>}
-                                            </div>
-                                            <div className="col-4">
-                                                <label htmlFor="name">Analisis requerido</label>
-                                                <br />
-                                                {analisisSeleccionado && <label className="text-500">{analisisSeleccionado.name}</label>}
-                                            </div>
-                                            <div className="col-2">
-                                                <label htmlFor="name">Tipo de muestra</label>
-                                                <br />
-                                                {tipoMuestraSeleccionado && <label className="text-500">{tipoMuestraSeleccionado.name}</label>}
-                                            </div>
+                                    <div className="col-8">
+                                    <div className="col-12">
+                                            <label htmlFor="obser">Observaciones de resultados</label>
+                                            <InputTextarea id="obser" value={obsResults} onChange={(e) => onObsResultsChange(e)} rows={2} cols={20} autoResize />
                                         </div>
-                                        <div className="formgroup-inline">
-                                            <div className="col-4">
-                                                <label className="mr-3">Nº muestras igresadas:</label>
-                                                {proyectoSeleccionado && <label className="text-500">{numSample}</label>}
-                                            </div>
-                                            <div className="col-4">
-                                                <label className="mr-3">Nº muestras procesadas:</label>
-                                                {analisisSeleccionado && <label className="text-500">{numProcessedSample}</label>}
-                                            </div>
+                                        <div className="col-12">
+                                            <label htmlFor="obser">Anexos</label>
+                                            <InputTextarea id="obser" value={anexos} onChange={(e) => onAnexosChange(e)} rows={2} cols={20} autoResize />
                                         </div>
-                                        <div className="formgroup-inline">
-                                            <div className="col-3">
-                                                <label htmlFor="dateReques">Fecha de reporte de resultados</label>
-                                                <Calendar id="dateReques" showIcon showButtonBar value={dateValueRequest} onChange={(e) => { setDateValueRequest(e.target.value); }}></Calendar>
-                                                {submitted && !dateValueRequest && <small className="p-invalid" >Fecha es requerido.</small>}
-                                            </div>
-                                            <div className="col-5">
-                                                <label htmlFor="obser">Resultados</label>
-                                                <InputTextarea id="obser" value={results} onChange={(e) => onResultsChange(e)} rows={1} cols={20} autoResize />
-                                                {submitted && !results && <small className="p-invalid" style={{ color: "#ef9a9a" }}>Ingrese resultados.</small>}
-                                            </div>
-                                            <div className="col-4">
-                                                <label htmlFor="obser">Observaciones</label>
-                                                <InputTextarea id="obser" value={obsResults} onChange={(e) => onObsResultsChange(e)} rows={1} cols={20} autoResize />
-                                            </div>
+                                        <div className="col-12">
+                                            <label htmlFor="obser">Observaciones del cliente</label>
+                                            <InputTextarea id="obser" value={obsClient} onChange={(e) => onObsClientChange(e)} rows={2} cols={20} autoResize />
                                         </div>
-                                    </div>
-                                </div>
-                                <div className="mx-5">
-                                    <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-                                        <h5>Muestras</h5>
-                                    </div>
-                                    <div className="p-fluid mt-2">
-                                        <DataTable value={products3} editMode="cell" className="editable-cells-table" rowHover scrollable inline style={{ fontSize: '14px', textAlign: 'center' }}
-                                            emptyMessage="Ninguna muestra agragada.">
-                                            {isSequence &&
-                                                columnsSecuenced.map(({ field, header }) => {
-                                                    return <Column key={field} field={field} header={header}
-                                                        style={{ width: (field === 'idNum') ? '2rem' : (field === 'placeCode') ? '8rem' : (field === 'quality' || field === 'isFasta' || field === 'identity') ? '8rem' : '15rem' }}
-                                                    />
-                                                })
-                                            }
-                                            {!isSequence &&
-                                                columns.map(({ field, header }) => {
-                                                    return <Column key={field} field={field} header={header}
-                                                        style={{ width: (field === 'idNum') ? '2rem' : (field === 'placeCode') ? '8rem' : (field === 'quality' || field === 'isFasta' || field === 'identity') ? '8rem' : '15rem' }}
-                                                    />
-                                                })
-                                            }
-                                        </DataTable>
                                     </div>
                                 </div>
                             </div>
                         </Dialog>
-                        <Dialog visible={pdfDialog} style={{ width: '750px' }} header="Evidencia" modal className="p-fluid" onHide={hideDialog}>
+                        <Dialog visible={pdfDialog} style={{ width: '750px' }} header="Reporte de resultados" modal className="p-fluid" onHide={hideDialog}>
                             <div className='pdf-container'>
                                 {viewPdf && <><Worker workerUrl="https://unpkg.com/pdfjs-dist@2.13.216/build/pdf.worker.js">
                                     <Viewer
@@ -486,7 +438,7 @@ export const ReporteResultadosColeccion = () => {
                                         plugins={[defaultLayoutPluginInstance]}
                                     />
                                 </Worker></>}
-                                {!viewPdf && <>Archivo pdf no seleccionado</>}
+                                {!viewPdf && <>Archivo no cargado</>}
                             </div>
                         </Dialog>
                         <Dialog visible={loadDialog} style={{ width: '700px' }} header="Subir archivo" modal className="p-fluid" footer={uploadDialogFooter} onHide={hideDialog}>
